@@ -1,0 +1,48 @@
+Program for rest access to database. 
+
+All module will work through 1 database account
+
+Include modules:
+
+1) SqlRequest worker 
+    Class that will build sql queries by rest api
+2) TokenWorker
+    Class to generate/validate access tokens
+3) DatabaseWorker
+    Class to read db structure (schemas -> tables -> columns -> types):     
+    All sctructure will store in local sqlite database (if docker with rest module turn off - we can reread structure and dont do new requests to database )
+    All logs will be stored in that database too. 
+    For each db type will be own worker (class)
+4) RestRequest worker 
+    Class to build answer request and process incoming request
+
+
+------------------------------------------------------------------------------------------------------------
+AUTHENTICATION                                                                                             |
+------------------------------------------------------------------------------------------------------------
+Every system user must have own API key that will randomly generate and will send only once on (ADD NEW USER REQUEST)
+Admin api key can be set on docker start (pass as an argument) and can be changed (not 0.1 version)
+
+
+------------------------------------------------------------------------------------------------------------
+REQUESTS                                                                                                    |
+------------------------------------------------------------------------------------------------------------
+Request structure: 
+    headers: {
+        'TOKEN': "", 
+        'request_type': "" # Possible values : AddUserRequest / GetDataRequest (other in 1.0 or later) : ListTablesRequest / ListColumnsRequest
+    }, 
+    # GetDataRequest
+    body: {
+        'table': 'string', 
+        'columns_list': 'list', # required: False / default: All (*), 
+        'filter': { # required: False / default: None
+            'column': {
+                'filter_type': # Possible values: 'equal', 'more', 'less', 'between', 
+                'value' : string or int 
+            }
+        } 
+        'limit': integer# required: False / default: None
+    }
+
+
