@@ -46,3 +46,15 @@ Request structure:
     }
 
 
+------------------------------------------------------------------------------------------------------------
+PLAN                                                                                                        |
+------------------------------------------------------------------------------------------------------------
+
+[] Module that take a dict (from json HTTP request) and transforms it into sql query (for postgre in 0.1) and parent class for other DB
+[] Module that will read a DataBase structure and save it in local db(sqlite or smth) or in yaml 
+[] TokenWorker with functions: 
+    1) generate token
+    2) validate token (is token has access to table)
+    3) remove token 
+[] REST worker for incoming GET requests (manage requests)
+[] REST worker for responses (transform data to json)
