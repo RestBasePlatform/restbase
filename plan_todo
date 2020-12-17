@@ -61,11 +61,14 @@ PLAN                                                                            
 [] REST worker for responses (transform data to json)
 [] Combine ALL
 [] Release 0.1 
-[] Motule for sql request and reading database structure for mqsql
+[] Logs to external database support
+[] Module for sql request and reading database structure for mqsql
 [] Release 0.2
-[] Motule for sql request and reading database structure for Oracle
+[] Module for sql request and reading database structure for Oracle
+[] Add isin as filter 
 [] Release 0.3
-[] Motule for sql request and reading database structure for clickhouse
+[] Prometheus/node exporter/graphana option for docker
+[] Module for sql request and reading database structure for clickhouse
 [] Release 0.4
 [] Release 1.0
 [] Gui (may be JS) for admnistration 
