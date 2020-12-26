@@ -66,6 +66,7 @@ PLAN                                                                            
 [] Release 0.2
 [] Module for sql request and reading database structure for Oracle
 [] Add isin as filter 
+[] Views feature (user save his query with some name and than just call this like table by view name)
 [] Release 0.3
 [] Prometheus/node exporter/graphana option for docker
 [] Module for sql request and reading database structure for clickhouse
