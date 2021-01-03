@@ -1,0 +1,40 @@
+name: Module tests with pytest
+on: push
+
+
+jobs:
+  pytest-job:
+    runs-on: ubuntu-latest
+
+
+    services:
+      postgres:
+        image: postgres:11
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+          architecture: 'x64'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Prepare postgres
+        run: |
+          psql -d postgresql://postgres:password@localhost/postgres "CREATE DATABASE test_postgre_type_db;" -U postgres
+          cd alembic
+          alembic upgrade head
+          cd ../
+
+      - name: 'Tests'
+        run: pytest -v
