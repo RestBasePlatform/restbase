@@ -21,13 +21,12 @@ depends_on = None
 def upgrade():
     op.create_table(
         "tables_info",
-        sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("table_name", sa.String(64), nullable=False),
         sa.Column(
             "folder_name", sa.String(64), nullable=False
         ),  # something like schema
         sa.Column("database_name", sa.String(), sa.ForeignKey("bases.name")),
-        sa.Column("local_name", sa.String(200), nullable=False),
+        sa.Column("local_name", sa.String(200), nullable=False, primary_key=True),
         sa.Column("columns", postgresql.JSON(), nullable=False),
     )
 

@@ -29,9 +29,12 @@ class LocalBaseWorker:
         table_name: str,
         folder_name: str,
         database_name: str,
-        local_name: str,
         columns: dict,
+        local_name: str = None,
     ):
+        print(local_name)
+        if not local_name:
+            local_name = "_".join([database_name, folder_name, table_name])
         new_table = TablesInfoTable(
             table_name=table_name,
             folder_name=folder_name,
@@ -51,17 +54,18 @@ class LocalBaseWorker:
         local_table_name: str = None,
     ):
         return (
-            self.db_session.query(TablesInfoTable).filter_by(local_name=local_table_name).first()
+            self.db_session.query(TablesInfoTable)
+            .filter_by(local_name=local_table_name)
+            .first()
             if local_table_name
-            else self.db_session.query(TablesInfoTable).filter_by(
+            else self.db_session.query(TablesInfoTable)
+            .filter_by(
                 database_name=database_name,
                 folder_name=folder_name,
                 table_name=table_name,
-            ).first()
+            )
+            .first()
         )
 
-    def get_database(
-        self, 
-        database_name: str
-    ) -> BasesTable:
+    def get_database(self, database_name: str) -> BasesTable:
         return self.db_session.query(BasesTable).filter_by(name=database_name).first()

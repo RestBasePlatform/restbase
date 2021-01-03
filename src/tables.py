@@ -20,7 +20,6 @@ class TokenTable(Base):
 class BasesTable(Base):
     __tablename__ = "bases"
 
-    id = Column(Integer, primary_key=True)
     type = Column(String)
     description = Column(String)
     name = Column(String, primary_key=True)
@@ -33,9 +32,8 @@ class BasesTable(Base):
 class TablesInfoTable(Base):
     __tablename__ = "tables_info"
 
-    id = Column(Integer, primary_key=True)
     table_name = Column(String)
     folder_name = Column(String)
-    database_name = Column(String, ForeignKey("bases.name"))
+    database_name = Column(String, ForeignKey("bases.name"), primary_key=True)
     local_name = Column(String)
     columns = Column(postgresql.JSON)

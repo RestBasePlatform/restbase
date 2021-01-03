@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import pytest
 
 from localbase import LocalBaseWorker
@@ -12,9 +14,7 @@ class TestLocalBaseWorker:
     def test_add_database(self, postgres_test_data):
         conn = self.test_object.db_session
 
-        test_db_list = [
-            postgres_test_data
-        ]
+        test_db_list = [postgres_test_data]
 
         for test_db in test_db_list:
             self.test_object.add_database(
@@ -37,7 +37,31 @@ class TestLocalBaseWorker:
     def test_write_table_params(self, tables_data_postgres):
         conn = self.test_object.db_session
 
+        # WHAT!?!?!??!?!
+        _tables_data_postgres = deepcopy(tables_data_postgres)
+        tables_data_postgres.pop("local_name", None)
+        tables_data_postgres_no_local_name = tables_data_postgres
+        tables_data_postgres = deepcopy(_tables_data_postgres)
+
+        self.test_object.write_table_params(**tables_data_postgres_no_local_name)
+        table_data = conn.query(TablesInfoTable).all()[0]
+
+        for key in tables_data_postgres_no_local_name:
+            assert getattr(table_data, key) == tables_data_postgres[key]
+
+        assert getattr(table_data, "local_name") == "_".join(
+            [
+                tables_data_postgres_no_local_name["database_name"],
+                tables_data_postgres_no_local_name["folder_name"],
+                tables_data_postgres_no_local_name["table_name"],
+            ]
+        )
+
+        conn.delete(conn.query(TablesInfoTable).first())
+        conn.commit()
+
         self.test_object.write_table_params(**tables_data_postgres)
+
         table_data = conn.query(TablesInfoTable).all()[0]
         for key in tables_data_postgres:
             assert getattr(table_data, key) == tables_data_postgres[key]
@@ -60,7 +84,7 @@ class TestLocalBaseWorker:
             assert getattr(res, key) == tables_data_postgres[key]
 
     def test_get_database(self, postgres_test_data):
-        res = self.test_object.get_database(database_name = 'test_postgres')
+        res = self.test_object.get_database(database_name="test_postgres")
 
         for key in postgres_test_data:
             assert getattr(res, key) == postgres_test_data[key]
