@@ -1,7 +1,5 @@
 from copy import deepcopy
 
-import pytest
-
 from localbase import LocalBaseWorker
 from tables import BasesTable
 from tables import TablesInfoTable
