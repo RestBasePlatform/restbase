@@ -29,13 +29,9 @@ class LocalBaseWorker:
         table_name: str,
         folder_name: str,
         database_name: str,
+        local_name: str,
         columns: dict,
-        local_name: str = None
-    ):  
-        # By default local name as base_folder_table
-        if not local_name: 
-            local_name = '_'.join([database_name, folder_name, table_name])
-
+    ):
         new_table = TablesInfoTable(
             table_name=table_name,
             folder_name=folder_name,
@@ -69,13 +65,3 @@ class LocalBaseWorker:
         database_name: str
     ) -> BasesTable:
         return self.db_session.query(BasesTable).filter_by(name=database_name).first()
-
-    def grant_access_for_token(
-        self, 
-        token: str, 
-        database_name: str = None, 
-        folder_name: str = None, 
-        table_name: str = None, 
-        local_table_name: str = None
-    ):
-        pass
