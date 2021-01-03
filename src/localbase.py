@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from tables import BasesTable
 from tables import TablesInfoTable
+from tables import TokenTable
 
 
 class LocalBaseWorker:
@@ -69,3 +70,52 @@ class LocalBaseWorker:
 
     def get_database(self, database_name: str) -> BasesTable:
         return self.db_session.query(BasesTable).filter_by(name=database_name).first()
+
+    def add_token(self, new_token: str, description: str):
+        new_token = TokenTable(
+            token=new_token, description=description, granted_tables=[]
+        )
+
+        self.db_session.add(new_token)
+        self.db_session.commit()
+
+    def add_table_for_token(
+        self,
+        token: str,
+        database_name: str = None,
+        folder_name: str = None,
+        table_name: str = None,
+        local_table_name: str = None,
+    ):
+        if not local_table_name:
+            local_table_name = self._get_local_table_name(
+                database_name=database_name,
+                folder_name=folder_name,
+                table_name=table_name,
+            )
+        row = self.db_session.query(TokenTable).filter_by(token=token).first()
+        row.granted_tables = row.granted_tables + [local_table_name]
+        print(row)
+        self.db_session.commit()
+
+    def _get_local_table_name(
+        self,
+        database_name: str = None,
+        folder_name: str = None,
+        table_name: str = None,
+    ):
+        return (
+            self.db_session.query(TablesInfoTable)
+            .filter_by(
+                database_name=database_name,
+                folder_name=folder_name,
+                table_name=table_name,
+            )
+            .first()
+            .local_name
+        )
+
+
+# a = LocalBaseWorker()
+# # a.add_token('123456', None)
+# a.add_table_for_token('123456', local_table_name='12345')

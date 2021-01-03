@@ -28,3 +28,12 @@ def tables_data_postgres():
         "local_name": "test_table",
         "columns": {"column1": "type1", "column2": "type2"},
     }
+
+
+@pytest.fixture
+def token_for_test():
+    return {
+        "token": "test-token",
+        "description": "some-description",
+        "granted_tables": [],
+    }

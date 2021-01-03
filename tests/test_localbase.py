@@ -5,6 +5,7 @@ import pytest
 from localbase import LocalBaseWorker
 from tables import BasesTable
 from tables import TablesInfoTable
+from tables import TokenTable
 
 
 class TestLocalBaseWorker:
@@ -88,3 +89,36 @@ class TestLocalBaseWorker:
 
         for key in postgres_test_data:
             assert getattr(res, key) == postgres_test_data[key]
+
+    def test_add_token(self, token_for_test):
+        self.test_object.add_token(
+            token_for_test["token"], token_for_test["description"]
+        )
+
+        token_row = (
+            self.test_object.db_session.query(TokenTable)
+            .filter_by(token=token_for_test["token"])
+            .first()
+        )
+
+        for key in token_for_test:
+            assert getattr(token_row, key) == token_for_test[key]
+
+    def test_add_table_for_token(self, token_for_test, tables_data_postgres):
+        token_row = (
+            self.test_object.db_session.query(TokenTable)
+            .filter_by(token=token_for_test["token"])
+            .first()
+        )
+        assert not token_row.granted_tables
+
+        self.test_object.add_table_for_token(
+            token_for_test["token"], local_table_name=tables_data_postgres["local_name"]
+        )
+
+        token_row = (
+            self.test_object.db_session.query(TokenTable)
+            .filter_by(token=token_for_test["token"])
+            .first()
+        )
+        assert set(token_row.granted_tables) == {tables_data_postgres["local_name"]}
