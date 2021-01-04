@@ -53,7 +53,7 @@ class LocalBaseWorker:
         folder_name: str = None,
         table_name: str = None,
         local_table_name: str = None,
-    ):
+    ) -> TablesInfoTable:
         return (
             self.db_session.query(TablesInfoTable)
             .filter_by(local_name=local_table_name)
