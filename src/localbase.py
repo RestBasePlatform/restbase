@@ -124,6 +124,41 @@ class LocalBaseWorker:
             .local_name
         )
 
+    def get_token_tables(self, token: str) -> list:
+        return (
+            self.db_session.query(TokenTable)
+            .filter_by(token=token)
+            .first()
+            .granted_tables
+        )
+
+    def is_table_exists(
+        self,
+        database_name: str = None,
+        folder_name: str = None,
+        table_name: str = None,
+        local_table_name: str = None,
+    ):
+        return (
+            (
+                self.db_session.query(TablesInfoTable)
+                .filter_by(local_name=local_table_name)
+                .first()
+                is not None
+            )
+            if local_table_name
+            else (
+                self.db_session.query(TablesInfoTable)
+                .filter_by(
+                    database_name=database_name,
+                    folder_name=folder_name,
+                    table_name=table_name,
+                )
+                .first()
+            )
+            is not None
+        )
+
 
 # a = LocalBaseWorker()
 # # a.add_token('123456', None)
