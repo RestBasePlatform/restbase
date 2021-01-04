@@ -120,3 +120,24 @@ class TestLocalBaseWorker:
             .first()
         )
         assert set(token_row.granted_tables) == {tables_data_postgres["local_name"]}
+
+    def test_get_token_tables(self, token_for_test, tables_data_postgres):
+        assert set(self.test_object.get_token_tables(token_for_test["token"])) == {
+            tables_data_postgres["local_name"]
+        }
+
+    def test_is_table_exists(self, tables_data_postgres):
+        assert not self.test_object.is_table_exists(local_table_name="some-random")
+        assert self.test_object.is_table_exists(
+            local_table_name=tables_data_postgres["local_name"]
+        )
+
+        assert not self.test_object.is_table_exists(
+            database_name="random", folder_name="random", table_name="random"
+        )
+
+        assert self.test_object.is_table_exists(
+            database_name=tables_data_postgres["database_name"],
+            folder_name=tables_data_postgres["folder_name"],
+            table_name=tables_data_postgres["table_name"],
+        )
