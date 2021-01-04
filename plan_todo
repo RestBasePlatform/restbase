@@ -9,7 +9,7 @@ Include modules:
 2) TokenWorker
     Class to generate/validate access tokens
 3) DatabaseWorker
-    Class to read db structure (schemas -> tables -> columns -> types):
+    Class to read db structure (schemas -> tables -> columns -> types(if type == datetime -> time format)):
     All sctructure will store in local sqlite database (if docker with rest module turn off - we can reread structure and dont do new requests to database )
     All logs will be stored in that database too.
     For each db type will be own worker (class)
@@ -35,13 +35,14 @@ Request structure:
     # GetDataRequest
     body: {
         'table': 'string',
-        'columns_list': 'list', # required: False / default: All (*),
+        'columns': 'list', # required: False / default: All (*),
         'filter': { # required: False / default: None
             'column': {
-                'filter_type': # Possible values: 'equal', 'more', 'less', 'between',
-                'value' : string or int
+                'filter_type': # Possible values: 'equal', 'more', 'less' # Later: 'between',
+                'value' : string(dt-format) or int
             }
         }
+        'filter_type': 'or' / 'and' # Required if filter contains more than 1 criteria
         'limit': integer# required: False / default: None
     }
 

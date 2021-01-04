@@ -7,13 +7,21 @@ from tables import TokenTable
 
 
 class LocalBaseWorker:
-    def __init__(self, ip="localhost", user="postgres", password="password"):
-        self.db_session = self._get_connection(ip, user, password)
+    def __init__(
+        self,
+        ip="localhost",
+        user="postgres",
+        password="password",
+        database_name="postgres",
+    ):
+        self.db_session = self._get_connection(ip, user, password, database_name)
 
     @staticmethod
-    def _get_connection(ip: str, user: str, password: str) -> Session:
+    def _get_connection(
+        ip: str, user: str, password: str, database_name: str
+    ) -> Session:
         return Session(
-            bind=create_engine(f"postgresql://{user}:{password}@{ip}/postgres")
+            bind=create_engine(f"postgresql://{user}:{password}@{ip}/{database_name}")
         )
 
     def add_database(self, base_type, description, name, **con_params):
@@ -33,9 +41,10 @@ class LocalBaseWorker:
         columns: dict,
         local_name: str = None,
     ):
-        print(local_name)
+
         if not local_name:
             local_name = "_".join([database_name, folder_name, table_name])
+
         new_table = TablesInfoTable(
             table_name=table_name,
             folder_name=folder_name,
@@ -53,7 +62,7 @@ class LocalBaseWorker:
         folder_name: str = None,
         table_name: str = None,
         local_table_name: str = None,
-    ):
+    ) -> TablesInfoTable:
         return (
             self.db_session.query(TablesInfoTable)
             .filter_by(local_name=local_table_name)
