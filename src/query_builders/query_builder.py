@@ -1,4 +1,4 @@
-from src.localbase import LocalBaseWorker
+from localbase import LocalBaseWorker
 
 
 class QueryBuilder:
@@ -22,7 +22,7 @@ class QueryBuilder:
 
     def add_columns(self):
         self.query = (
-            self.query.replace("%columns%", ",".join(self.request["columns"]))
+            self.query.replace("%columns%", ", ".join(self.request["columns"]))
             if "columns" in self.request
             else self.query.replace("%columns%", "*")
         )
@@ -46,7 +46,7 @@ class QueryBuilder:
                     [
                         col,
                         self.request["filter"][col]["filter_type"],
-                        self.request["filter"][col]["value"],
+                        str(self.request["filter"][col]["value"]),
                     ]
                 )
             )
@@ -58,4 +58,4 @@ class QueryBuilder:
         )
 
     def apply_limit(self):
-        self.query += " ".join(["limit", self.request["limit"]])
+        self.query += " ".join([" limit", self.request["limit"]])
