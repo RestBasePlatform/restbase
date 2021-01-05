@@ -53,8 +53,18 @@ class LocalBaseWorker:
             columns=columns,
         )
 
-        self.db_session.add(new_table)
-        self.db_session.commit()
+        exist_obj = (
+            self.db_session.query(TablesInfoTable)
+            .filter_by(local_name=new_table.local_name)
+            .first()
+        )
+        if not exist_obj:
+            self.db_session.add(new_table)
+            self.db_session.commit()
+        else:
+            for attr in ["table_name", "folder_name", "database_name", "columns"]:
+                setattr(exist_obj, getattr(new_table, attr), attr)
+            self.db_session.commit()
 
     def get_table(
         self,
@@ -158,8 +168,3 @@ class LocalBaseWorker:
             )
             is not None
         )
-
-
-# a = LocalBaseWorker()
-# # a.add_token('123456', None)
-# a.add_table_for_token('123456', local_table_name='12345')
