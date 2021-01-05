@@ -12,7 +12,7 @@ def postgres_test_data():
         "type": "postgres",
         "description": "test postgres base",
         "name": "test_postgres",
-        "ip": "localhost",
+        "ip": "postgres_internal",
         "port": "5432",
         "username": "postgres",
         "password": "password",
