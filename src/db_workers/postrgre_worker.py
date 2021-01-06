@@ -25,11 +25,24 @@ class PostgreWorker(DatabaseWorker):
         local_base_worker: LocalBaseWorker,
     ):
         super().__init__()
+
         self.db_name = db_name
         self.local_base = local_base_worker
         self.host = host
+
         self.engine = create_engine(f"postgresql://{user}:{password}@{host}/{db_name}")
         self.connection = Session(bind=self.engine)
+
+        if self.db_name not in self.local_base.get_db_name_list():
+            self.local_base.add_database(
+                "postgres",
+                "postgres_test_base",
+                db_name,
+                ip=host,
+                port="5432",
+                username="postgres",
+                password="password",
+            )
 
     def download_table_list(self):
         tables = pd.read_sql(self.GET_TABLE_NAME_REQUEST, con=self.engine)
@@ -43,7 +56,6 @@ class PostgreWorker(DatabaseWorker):
             .apply(self.row_dict_converter)
             .reset_index()
         )
-        print(tables.head())
         tables.columns = ["table_schema", "table_name", "columns"]
 
         for _, row in tables.iterrows():
@@ -60,5 +72,4 @@ class PostgreWorker(DatabaseWorker):
         d = {}
         for l2 in row.values:
             d[l2[0]] = l2[1]
-        print(d)
         return json.loads(json.dumps(d))
