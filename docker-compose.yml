@@ -1,22 +1,26 @@
 version: '3'
 services:
   postgres_internal:
-    image: "postgres" # use latest official postgres version
+    image: postgres
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_HOST_AUTH_METHOD: trust
     networks:
       - default
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+
+  postgres_test_base:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    networks:
+      - default
 
   api:
     build: .
     depends_on:
       - postgres_internal
+      - postgres_test_base
     environment:
       STAGE: test
     networks:

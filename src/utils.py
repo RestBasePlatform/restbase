@@ -1,8 +1,8 @@
-from src.localbase import LocalBaseWorker
+import typing
 
 
 def validate_request_body(
-    required_fields: list, request_body: dict, local_db_worker: LocalBaseWorker
+    required_fields: list, request_body: dict, local_db_worker
 ) -> dict:
     # Check if all fields defined
     for f in required_fields:
@@ -21,3 +21,14 @@ def validate_request_body(
         request_body["limit"] = float(request_body["limit"])
 
     return request_body
+
+
+def get_existing_data(
+    sql_session, table_class_object, target_attr: str = None
+) -> typing.List:
+    if not getattr(table_class_object, "__tablename__"):
+        raise ValueError("Получен неверный table_class_object.")
+
+    data = sql_session.query(table_class_object).all()
+
+    return [getattr(i, target_attr) for i in data] if target_attr else data

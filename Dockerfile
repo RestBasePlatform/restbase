@@ -7,4 +7,4 @@ COPY . /app
 WORKDIR /app
 
 
-ENTRYPOINT bash postgres_waiter.sh postgres_internal && cd alembic && alembic upgrade head && cd ../ &&  pytest -v
+ENTRYPOINT bash postgres_waiter.sh postgres_internal && bash postgres_waiter.sh postgres_test_base &&  cd alembic && alembic upgrade head && cd ../ && cd tests && python3 db_preparation.py && cd ../ &&  pytest -v

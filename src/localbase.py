@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from tables import BasesTable
 from tables import TablesInfoTable
 from tables import TokenTable
+from utils import get_existing_data
 
 
 class LocalBaseWorker:
@@ -25,7 +26,6 @@ class LocalBaseWorker:
         )
 
     def add_database(self, base_type, description, name, **con_params):
-        print(base_type, description, name, con_params)
         new_database = BasesTable(
             type=base_type, description=description, name=name, **con_params
         )
@@ -53,8 +53,18 @@ class LocalBaseWorker:
             columns=columns,
         )
 
-        self.db_session.add(new_table)
-        self.db_session.commit()
+        exist_obj = (
+            self.db_session.query(TablesInfoTable)
+            .filter_by(local_name=new_table.local_name)
+            .first()
+        )
+        if not exist_obj:
+            self.db_session.add(new_table)
+            self.db_session.commit()
+        else:
+            for attr in ["table_name", "folder_name", "database_name", "columns"]:
+                setattr(exist_obj, attr, getattr(new_table, attr))
+            self.db_session.commit()
 
     def get_table(
         self,
@@ -80,6 +90,9 @@ class LocalBaseWorker:
     def get_database(self, database_name: str) -> BasesTable:
         return self.db_session.query(BasesTable).filter_by(name=database_name).first()
 
+    def get_db_name_list(self) -> list:
+        return get_existing_data(self.db_session, BasesTable, "name")
+
     def add_token(self, new_token: str, description: str):
         new_token = TokenTable(
             token=new_token, description=description, granted_tables=[]
@@ -104,7 +117,7 @@ class LocalBaseWorker:
             )
         row = self.db_session.query(TokenTable).filter_by(token=token).first()
         row.granted_tables = row.granted_tables + [local_table_name]
-        print(row)
+
         self.db_session.commit()
 
     def _get_local_table_name(
@@ -158,8 +171,3 @@ class LocalBaseWorker:
             )
             is not None
         )
-
-
-# a = LocalBaseWorker()
-# # a.add_token('123456', None)
-# a.add_table_for_token('123456', local_table_name='12345')
