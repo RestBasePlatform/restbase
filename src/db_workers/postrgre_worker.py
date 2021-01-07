@@ -4,16 +4,15 @@ import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from .db_worker import DatabaseWorker
+from db_workers import DatabaseWorker
 from exceptions import EmptyDatabaseError
-from localbase import LocalBaseWorker
 
 
 class PostgreWorker(DatabaseWorker):
 
     GET_TABLE_NAME_REQUEST = """
-    SELECT column_name, data_type, table_schema, table_name FROM information_schema.columns
-    where table_schema <> 'pg_catalog' and table_schema <> 'information_schema'
+        SELECT column_name, data_type, table_schema, table_name FROM information_schema.columns
+        where table_schema <> 'pg_catalog' and table_schema <> 'information_schema'
     """
 
     def __init__(
@@ -22,7 +21,7 @@ class PostgreWorker(DatabaseWorker):
         db_name: str,
         user: str,
         password: str,
-        local_base_worker: LocalBaseWorker,
+        local_base_worker,
     ):
         super().__init__()
 
@@ -73,3 +72,7 @@ class PostgreWorker(DatabaseWorker):
         for l2 in row.values:
             d[l2[0]] = l2[1]
         return json.loads(json.dumps(d))
+
+    def execute_get_data_request(self, request: str, return_type: str = "json"):
+        if return_type == "json":
+            return pd.read_sql(request, con=self.engine).to_json(orient="columns")

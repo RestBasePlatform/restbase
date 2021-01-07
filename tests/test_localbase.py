@@ -8,7 +8,7 @@ from tables import TokenTable
 
 class TestLocalBaseWorker:
     def setup(self):
-        self.test_object = LocalBaseWorker(ip="postgres_internal")
+        self.test_object = LocalBaseWorker(ip="postgres")
 
     def test_add_database(self, postgres_test_data):
         conn = self.test_object.db_session

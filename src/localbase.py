@@ -93,9 +93,15 @@ class LocalBaseWorker:
     def get_db_name_list(self) -> list:
         return get_existing_data(self.db_session, BasesTable, "name")
 
-    def add_token(self, new_token: str, description: str):
+    def get_local_name_list(self) -> list:
+        return get_existing_data(self.db_session, TablesInfoTable, "local_name")
+
+    def add_token(self, new_token: str, description: str, is_admin=False):
         new_token = TokenTable(
-            token=new_token, description=description, granted_tables=[]
+            token=new_token,
+            description=description,
+            granted_tables=[],
+            admin_access=is_admin,
         )
 
         self.db_session.add(new_token)
@@ -110,7 +116,7 @@ class LocalBaseWorker:
         local_table_name: str = None,
     ):
         if not local_table_name:
-            local_table_name = self._get_local_table_name(
+            local_table_name = self.get_local_table_name(
                 database_name=database_name,
                 folder_name=folder_name,
                 table_name=table_name,
@@ -120,7 +126,7 @@ class LocalBaseWorker:
 
         self.db_session.commit()
 
-    def _get_local_table_name(
+    def get_local_table_name(
         self,
         database_name: str = None,
         folder_name: str = None,
@@ -170,4 +176,20 @@ class LocalBaseWorker:
                 .first()
             )
             is not None
+        )
+
+    def get_db_type(self, local_table_name: str = None, db_name: str = None) -> str:
+        if local_table_name:
+            db_name = (
+                self.db_session.query(TablesInfoTable)
+                .filter_by(local_name=local_table_name)
+                .first()
+                .database_name
+            )
+        return self.db_session.query(BasesTable).filter_by(name=db_name).first().type
+
+    @property
+    def is_main_admin_token_exists(self) -> bool:
+        return "main admin token" in get_existing_data(
+            self.db_session, TokenTable, "description"
         )

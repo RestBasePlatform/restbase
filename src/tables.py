@@ -1,3 +1,4 @@
+from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy import String
@@ -14,6 +15,7 @@ class TokenTable(Base):
     token = Column(String, primary_key=True)
     description = Column(String)
     granted_tables = Column(postgresql.ARRAY(postgresql.TEXT, dimensions=1))
+    admin_access = Column(Boolean)
 
 
 class BasesTable(Base):

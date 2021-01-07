@@ -1,13 +1,16 @@
 import typing
 
+from db_workers import DatabaseWorker
+from db_workers import PostgreWorker
 
-def validate_request_body(
+
+def validate_get_data_request_body(
     required_fields: list, request_body: dict, local_db_worker
 ) -> dict:
     # Check if all fields defined
     for f in required_fields:
         if f not in request_body:
-            raise FileNotFoundError(f"Field {f} not defined in request")
+            raise KeyError(f"Field {f} not defined in request")
 
     #  If columns defined - check if all exits in database
     if "columns" in request_body:
@@ -32,3 +35,20 @@ def get_existing_data(
     data = sql_session.query(table_class_object).all()
 
     return [getattr(i, target_attr) for i in data] if target_attr else data
+
+
+def get_local_table_name_from_request(request_body: dict, local_worker):
+    return (
+        request_body["local_table_name"]
+        if "local_table_name" in request_body
+        else local_worker.get_local_table_name(
+            database_name=request_body["database"],
+            folder_name=request_body["schema"],
+            table_name=request_body["table"],
+        )
+    )
+
+
+def get_worker(db_type: str) -> typing.Type[DatabaseWorker]:
+    if db_type == "postgres":
+        return PostgreWorker
