@@ -24,6 +24,7 @@ def upgrade():
         sa.Column("token", sa.String(64), nullable=False, primary_key=True),
         sa.Column("description", sa.String(200)),
         sa.Column("granted_tables", postgresql.ARRAY(postgresql.TEXT, dimensions=1)),
+        sa.Column("admin_access", sa.Boolean()),
     )
 
 

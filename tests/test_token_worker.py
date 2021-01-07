@@ -5,7 +5,7 @@ from token_worker import TokenWorker
 
 class TestTokenWorker:
     def setup(self):
-        self.local_base_worker = LocalBaseWorker(ip="postgres_internal")
+        self.local_base_worker = LocalBaseWorker(ip="postgres")
         self.token_worker_fot_tests = TokenWorker(self.local_base_worker)
 
     def test_add_token(self):

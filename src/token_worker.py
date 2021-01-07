@@ -2,6 +2,7 @@ import random
 import string
 import typing
 
+from exceptions import AdminTokenExistsError
 from localbase import LocalBaseWorker
 
 
@@ -14,10 +15,13 @@ class TokenWorker:
         description: str = None,
         access_tables: typing.List[str] = [],
         token: str = None,
+        is_admin: bool = False,
     ):
         if not token:
             token = self.generate_token()
-        self.local_base_worker.add_token(token, description)
+        if is_admin and self.local_base_worker.is_main_admin_token_exists:
+            raise AdminTokenExistsError
+        self.local_base_worker.add_token(token, description, is_admin=is_admin)
 
         for table in access_tables:
             self.local_base_worker.add_table_for_token(
@@ -33,3 +37,6 @@ class TokenWorker:
         return "".join(
             random.choice(string.ascii_uppercase + string.digits) for _ in range(64)
         )
+
+    def add_admin_token(self) -> str:
+        return self.add_token("main admin token", is_admin=True)

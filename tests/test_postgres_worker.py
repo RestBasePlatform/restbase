@@ -24,7 +24,7 @@ def postgres_test_base_data():
 
 class TestPostgreWorker:
     def setup(self):
-        self.local_worker = LocalBaseWorker(ip="postgres_internal")
+        self.local_worker = LocalBaseWorker(ip="postgres")
 
     def test_download_table_list(self, postgres_test_base_data):
         worker = PostgreWorker(

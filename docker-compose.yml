@@ -1,6 +1,6 @@
 version: '3'
 services:
-  postgres_internal:
+  postgres:
     image: postgres
     environment:
       POSTGRES_PASSWORD: password
@@ -17,9 +17,11 @@ services:
       - default
 
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile_tests
     depends_on:
-      - postgres_internal
+      - postgres
       - postgres_test_base
     environment:
       STAGE: test

@@ -29,8 +29,8 @@ REQUESTS                                                                        
 ------------------------------------------------------------------------------------------------------------
 Request structure:
     headers: {
-        'TOKEN': "",
-        'request_type': "" # Possible values : AddUserRequest / GetDataRequest (other in 1.0 or later) : ListTablesRequest / ListColumnsRequest
+        'token': "",
+        'request_type': "" # Possible values : AddUserRequest / GetDataRequest (other in 1.0 or later) : ListTablesRequest / ListColumnsRequest ???
     },
     # GetDataRequest
     body: {
@@ -51,10 +51,10 @@ Request structure:
 PLAN                                                                                                        |
 ------------------------------------------------------------------------------------------------------------
 
-[] Schema in pdf and draw io file
-[] Module that take a dict (from json HTTP request) and transforms it into sql query (for postgre in 0.1) and parent class for other DB
-[] Module that will read a DataBase structure and save it in local db(sqlite or smth) or in yaml (for postgre in 0.1)
-[] TokenWorker with functions:
+[x] Schema in pdf and draw io file
+[x] Module that take a dict (from json HTTP request) and transforms it into sql query (for postgre in 0.1) and parent class for other DB
+[x] Module that will read a DataBase structure and save it in local db(sqlite or smth) or in yaml (for postgre in 0.1)
+[x] TokenWorker with functions:
     1) generate token
     2) validate token (is token has access to table)
     3) remove token
