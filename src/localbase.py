@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -106,6 +108,9 @@ class LocalBaseWorker:
 
         self.db_session.add(new_token)
         self.db_session.commit()
+
+    def get_tokens_list(self) -> List[TokenTable]:
+        return get_existing_data(self.db_session, TokenTable)
 
     def add_table_for_token(
         self,

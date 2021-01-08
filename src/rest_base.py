@@ -23,6 +23,21 @@ def get_admin_token():
         return flask.make_response("Token already exists", 409)
 
 
+@app.route("/GenerateUserToken", methods=["GET"])
+def generate_user_token():
+    token = flask.request.headers.get("token")
+
+    if not token_worker.is_token_admin(token):
+        return flask.make_response("Access denied", 403)
+
+    # If new token defined - add it to db else - generate new
+    new_token = token_worker.add_token(
+        token=flask.request.args.get("token"),
+        description=flask.request.args.get("description"),
+    )
+    return flask.make_response({"status": "success", "new_token": new_token}, 201)
+
+
 @app.route("/GetData", methods=["GET"])
 def get_data_request():
     # Check if token has access to table

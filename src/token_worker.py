@@ -40,3 +40,8 @@ class TokenWorker:
 
     def add_admin_token(self) -> str:
         return self.add_token("main admin token", is_admin=True)
+
+    def is_token_admin(self, token) -> bool:
+        return token in [
+            i.token for i in self.local_base_worker.get_tokens_list() if i.admin_access
+        ]
