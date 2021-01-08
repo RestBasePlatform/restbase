@@ -1,6 +1,8 @@
 import flask
 
+from exceptions import AccessAlreadyGrantedError
 from exceptions import AdminTokenExistsError
+from exceptions import TableNotFoundError
 from localbase import LocalBaseWorker
 from query_builders import QueryBuilder
 from token_worker import TokenWorker
@@ -36,6 +38,26 @@ def generate_user_token():
         description=flask.request.args.get("description"),
     )
     return flask.make_response({"status": "success", "new_token": new_token}, 201)
+
+
+@app.route("/GrantTableAccess", methods=["POST"])
+def grant_table_access():
+    token = flask.request.headers.get("token")
+
+    if not token_worker.is_token_admin(token):
+        return flask.make_response("Access denied", 403)
+
+    try:
+        local_base_worker.add_table_for_token(
+            token=flask.request.args.get("user_token"),
+            local_table_name=get_local_table_name_from_request(
+                flask.request.args, local_base_worker
+            ),
+        )
+
+        return flask.make_response({"status": "success"}, 200)
+    except (TableNotFoundError, AccessAlreadyGrantedError) as e:
+        return flask.make_response({"status": "failed", "error": str(e)}, 404)
 
 
 @app.route("/GetData", methods=["GET"])

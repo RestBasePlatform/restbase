@@ -6,3 +6,13 @@ class EmptyDatabaseError(Exception):
 class AdminTokenExistsError(Exception):
     def __init__(self):
         super().__init__("Admin token already exists")
+
+
+class TableNotFoundError(Exception):
+    def __init__(self, table_name):
+        super().__init__(f'Table "{table_name}" not found')
+
+
+class AccessAlreadyGrantedError(Exception):
+    def __init__(self, table_name):
+        super().__init__(f'Access to "{table_name}" already granted')

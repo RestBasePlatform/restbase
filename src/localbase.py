@@ -3,6 +3,8 @@ from typing import List
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+from exceptions import AccessAlreadyGrantedError
+from exceptions import TableNotFoundError
 from tables import BasesTable
 from tables import TablesInfoTable
 from tables import TokenTable
@@ -127,15 +129,20 @@ class LocalBaseWorker:
                 table_name=table_name,
             )
         row = self.db_session.query(TokenTable).filter_by(token=token).first()
+
+        if not self.is_table_exists(local_table_name=local_table_name):
+            raise TableNotFoundError(local_table_name)
+        if local_table_name in self.get_token_tables(token):
+            raise AccessAlreadyGrantedError(local_table_name)
         row.granted_tables = row.granted_tables + [local_table_name]
 
         self.db_session.commit()
 
     def get_local_table_name(
         self,
-        database_name: str = None,
-        folder_name: str = None,
-        table_name: str = None,
+        database_name: str,
+        folder_name: str,
+        table_name: str,
     ):
         return (
             self.db_session.query(TablesInfoTable)
