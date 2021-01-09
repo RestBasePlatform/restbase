@@ -1,4 +1,8 @@
+import re
 import typing
+
+from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
 
 from db_workers import DatabaseWorker
 from db_workers import PostgreWorker
@@ -52,3 +56,18 @@ def get_local_table_name_from_request(request_body: dict, local_worker):
 def get_worker(db_type: str) -> typing.Type[DatabaseWorker]:
     if db_type == "postgres":
         return PostgreWorker
+
+
+def database_healthcheck(engine) -> bool:
+    try:
+        engine.connect()
+        return True
+    except OperationalError:
+        return False
+
+
+def get_db_engine(db_type: str, **con_params):
+    if db_type == "postgres":
+        return create_engine(
+            f"postgresql://{con_params.get('username')}:{con_params.get('password')}@{con_params.get('ip')}:{con_params.get('port')}/{con_params.get('db_name')}"
+        )

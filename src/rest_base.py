@@ -1,5 +1,6 @@
 import flask
 
+import http
 from exceptions import AccessAlreadyGrantedError
 from exceptions import AdminTokenExistsError
 from exceptions import TableNotFoundError

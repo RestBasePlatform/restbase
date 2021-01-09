@@ -8,6 +8,8 @@ from exceptions import TableNotFoundError
 from tables import BasesTable
 from tables import TablesInfoTable
 from tables import TokenTable
+from utils import database_healthcheck
+from utils import get_db_engine
 from utils import get_existing_data
 
 
@@ -30,6 +32,8 @@ class LocalBaseWorker:
         )
 
     def add_database(self, base_type, description, name, **con_params):
+        if not database_healthcheck(get_db_engine(base_type, **con_params)):
+            raise ConnectionError("Can't connect to database")
         new_database = BasesTable(
             type=base_type, description=description, name=name, **con_params
         )
