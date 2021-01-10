@@ -32,7 +32,9 @@ class LocalBaseWorker:
             bind=create_engine(f"postgresql://{user}:{password}@{ip}/{database_name}")
         )
 
-    def add_database(self, base_type, description, local_name=None, **con_params):
+    def add_database(
+        self, base_type, description, local_name=None, **con_params
+    ) -> str:
         if not database_health_check(get_db_engine(base_type, **con_params)):
             raise ConnectionError("Can't connect to database")
         if not local_name:
@@ -52,6 +54,24 @@ class LocalBaseWorker:
 
         self.db_session.add(new_database)
         self.db_session.commit()
+
+        return local_name
+
+    def get_database_and_connection(self, local_base_name: str):
+        database_obj = (
+            self.db_session.query(BasesTable)
+            .filter_by(local_name=local_base_name)
+            .first()
+        )
+
+        return database_obj, get_db_engine(
+            database_obj.type,
+            ip=database_obj.ip,
+            port=database_obj.port,
+            username=database_obj.username,
+            database=database_obj.database,
+            password=database_obj.password,
+        )
 
     def write_table_params(
         self,

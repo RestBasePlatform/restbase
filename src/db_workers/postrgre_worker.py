@@ -1,7 +1,6 @@
 import json
 
 import pandas as pd
-from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from db_workers import DatabaseWorker
@@ -17,38 +16,29 @@ class PostgreWorker(DatabaseWorker):
 
     def __init__(
         self,
-        host: str,
-        db_name: str,
-        user: str,
-        password: str,
+        local_name: str,
         local_base_worker,
     ):
-        super().__init__()
+        super().__init__(
+            local_name,
+            local_base_worker,
+        )
+        self.local_name = local_name
+        self.local_base_worker = local_base_worker
 
-        self.db_name = db_name
-        self.local_base = local_base_worker
-        self.host = host
-
-        self.engine = create_engine(f"postgresql://{user}:{password}@{host}/{db_name}")
+        self.database_obj, self.engine = local_base_worker.get_database_and_connection(
+            local_name
+        )
         self.connection = Session(bind=self.engine)
-
-        if self.db_name not in self.local_base.get_db_name_list():
-            self.local_base.add_database(
-                "postgres",
-                "postgres_test_base",
-                db_name,
-                ip=host,
-                port="5432",
-                username="postgres",
-                password="password",
-            )
 
     def download_table_list(self):
         tables = pd.read_sql(self.GET_TABLE_NAME_REQUEST, con=self.engine)
 
         # If database is empty
         if not len(tables):
-            raise EmptyDatabaseError(ip=self.host, db_name=self.db_name)
+            raise EmptyDatabaseError(
+                ip=self.database_obj.ip, db_name=self.database_obj.database
+            )
 
         tables = (
             tables.groupby(["table_schema", "table_name"])[["column_name", "data_type"]]
@@ -58,10 +48,10 @@ class PostgreWorker(DatabaseWorker):
         tables.columns = ["table_schema", "table_name", "columns"]
 
         for _, row in tables.iterrows():
-            self.local_base.write_table_params(
+            self.local_base_worker.write_table_params(
                 table_name=row["table_name"],
                 columns=row["columns"],
-                database_name=self.db_name,
+                database_name=self.database_obj.local_name,
                 folder_name=row["table_schema"],
             )
 

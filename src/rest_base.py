@@ -69,7 +69,7 @@ def add_database():
         return flask.make_response("Access denied", 403)
 
     try:
-        local_base_worker.add_database(
+        local_name = local_base_worker.add_database(
             flask.request.args.get("base_type"),
             flask.request.args.get("description"),
             flask.request.args.get("local_name"),
@@ -80,7 +80,11 @@ def add_database():
             password=flask.request.args.get("password"),
         )
 
-        return flask.make_response({"status": "success"}, 201)
+        worker = get_worker("postgres")(local_name, local_base_worker)
+        worker.download_table_list()
+
+        return flask.make_response({"status": "success", "local_name": local_name}, 200)
+
     except (DatabaseAlreadyExistsError, ConnectionError) as e:
         return flask.make_response({"status": "failed", "error": str(e)}, 409)
 
