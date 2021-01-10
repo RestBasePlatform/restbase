@@ -89,6 +89,18 @@ def add_database():
         return flask.make_response({"status": "failed", "error": str(e)}, 409)
 
 
+@app.route("/ListDatabase", methods=["GET"])
+def list_databases():
+    token = flask.request.headers.get("token")
+
+    if not token_worker.is_token_admin(token):
+        return flask.make_response("Access denied", 403)
+
+    return flask.make_response(
+        {"status": "succcess", "List": local_base_worker.get_db_name_list()}
+    )
+
+
 @app.route("/GetData", methods=["GET"])
 def get_data_request():
     # Check if token has access to table

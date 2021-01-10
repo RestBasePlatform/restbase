@@ -131,7 +131,7 @@ class LocalBaseWorker:
         return self.db_session.query(BasesTable).filter_by(name=database_name).first()
 
     def get_db_name_list(self) -> list:
-        return get_existing_data(self.db_session, BasesTable, "name")
+        return get_existing_data(self.db_session, BasesTable, "local_name")
 
     def get_local_name_list(self) -> list:
         return get_existing_data(self.db_session, TablesInfoTable, "local_name")
