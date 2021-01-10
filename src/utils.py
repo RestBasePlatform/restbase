@@ -1,4 +1,3 @@
-import re
 import typing
 
 from sqlalchemy import create_engine
@@ -53,12 +52,12 @@ def get_local_table_name_from_request(request_body: dict, local_worker):
     )
 
 
-def get_worker(db_type: str) -> typing.Type[DatabaseWorker]:
+def get_worker(db_type: str) -> typing.Type[DatabaseWorker]:  # noqa: TYP006
     if db_type == "postgres":
         return PostgreWorker
 
 
-def database_healthcheck(engine) -> bool:
+def database_health_check(engine) -> bool:
     try:
         engine.connect()
         return True
@@ -69,5 +68,6 @@ def database_healthcheck(engine) -> bool:
 def get_db_engine(db_type: str, **con_params):
     if db_type == "postgres":
         return create_engine(
-            f"postgresql://{con_params.get('username')}:{con_params.get('password')}@{con_params.get('ip')}:{con_params.get('port')}/{con_params.get('db_name')}"
+            f"postgresql://{con_params.get('username')}:{con_params.get('password')}@"
+            f"{con_params.get('ip')}:{con_params.get('port')}/{con_params.get('database')}"
         )

@@ -1,8 +1,8 @@
 import flask
 
-import http
 from exceptions import AccessAlreadyGrantedError
 from exceptions import AdminTokenExistsError
+from exceptions import DatabaseAlreadyExistsError
 from exceptions import TableNotFoundError
 from localbase import LocalBaseWorker
 from query_builders import QueryBuilder
@@ -59,6 +59,34 @@ def grant_table_access():
         return flask.make_response({"status": "success"}, 200)
     except (TableNotFoundError, AccessAlreadyGrantedError) as e:
         return flask.make_response({"status": "failed", "error": str(e)}, 404)
+
+
+@app.route("/AddDatabase", methods=["POST"])
+def add_database():
+    token = flask.request.headers.get("token")
+
+    if not token_worker.is_token_admin(token):
+        return flask.make_response("Access denied", 403)
+
+    try:
+        local_name = local_base_worker.add_database(
+            flask.request.args.get("base_type"),
+            flask.request.args.get("description"),
+            flask.request.args.get("local_name"),
+            ip=flask.request.args.get("ip"),
+            port=flask.request.args.get("port"),
+            database=flask.request.args.get("database"),
+            username=flask.request.args.get("username"),
+            password=flask.request.args.get("password"),
+        )
+
+        worker = get_worker("postgres")(local_name, local_base_worker)
+        worker.download_table_list()
+
+        return flask.make_response({"status": "success", "local_name": local_name}, 200)
+
+    except (DatabaseAlreadyExistsError, ConnectionError) as e:
+        return flask.make_response({"status": "failed", "error": str(e)}, 409)
 
 
 @app.route("/GetData", methods=["GET"])

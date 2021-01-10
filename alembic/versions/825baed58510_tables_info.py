@@ -25,7 +25,7 @@ def upgrade():
         sa.Column(
             "folder_name", sa.String(64), nullable=False
         ),  # something like schema
-        sa.Column("database_name", sa.String(), sa.ForeignKey("bases.name")),
+        sa.Column("database_name", sa.String(), sa.ForeignKey("bases.local_name")),
         sa.Column("local_name", sa.String(200), nullable=False, primary_key=True),
         sa.Column("columns", postgresql.JSON(), nullable=False),
     )
