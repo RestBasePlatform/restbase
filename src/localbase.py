@@ -127,8 +127,21 @@ class LocalBaseWorker:
             .first()
         )
 
-    def get_database(self, database_name: str) -> BasesTable:
-        return self.db_session.query(BasesTable).filter_by(name=database_name).first()
+    def get_database_object(self, local_database_name: str) -> BasesTable:
+        return (
+            self.db_session.query(BasesTable)
+            .filter_by(local_name=local_database_name)
+            .first()
+        )
+
+    def get_database_data(self, local_database_name: str):
+        obj = self.get_database_object(local_database_name)
+        return {
+            "ip": obj.ip,
+            "port": obj.port,
+            "username": obj.username,
+            "local_name": obj.local_name,
+        }
 
     def get_db_name_list(self) -> list:
         return get_existing_data(self.db_session, BasesTable, "local_name")

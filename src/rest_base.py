@@ -97,7 +97,24 @@ def list_databases():
         return flask.make_response("Access denied", 403)
 
     return flask.make_response(
-        {"status": "succcess", "List": local_base_worker.get_db_name_list()}
+        {"status": "success", "List": local_base_worker.get_db_name_list()}
+    )
+
+
+@app.route("/GetDatabaseData", methods=["GET"])
+def get_database_data():
+    token = flask.request.headers.get("token")
+
+    if not token_worker.is_token_admin(token):
+        return flask.make_response("Access denied", 403)
+
+    return flask.make_response(
+        {
+            "status": "success",
+            "Data": local_base_worker.get_database_data(
+                flask.request.args.get("local_database_name")
+            ),
+        }
     )
 
 
