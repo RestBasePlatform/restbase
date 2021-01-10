@@ -16,3 +16,8 @@ class TableNotFoundError(Exception):
 class AccessAlreadyGrantedError(Exception):
     def __init__(self, table_name):
         super().__init__(f'Access to "{table_name}" already granted')
+
+
+class DatabaseAlreadyExistsError(Exception):
+    def __init__(self, local_name):
+        super().__init__(f"Database with name {local_name} aleready exists")

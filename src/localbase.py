@@ -4,11 +4,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from exceptions import AccessAlreadyGrantedError
+from exceptions import DatabaseAlreadyExistsError
 from exceptions import TableNotFoundError
 from tables import BasesTable
 from tables import TablesInfoTable
 from tables import TokenTable
-from utils import database_healthcheck
+from utils import database_health_check
 from utils import get_db_engine
 from utils import get_existing_data
 
@@ -31,11 +32,22 @@ class LocalBaseWorker:
             bind=create_engine(f"postgresql://{user}:{password}@{ip}/{database_name}")
         )
 
-    def add_database(self, base_type, description, name, **con_params):
-        if not database_healthcheck(get_db_engine(base_type, **con_params)):
+    def add_database(self, base_type, description, local_name=None, **con_params):
+        if not database_health_check(get_db_engine(base_type, **con_params)):
             raise ConnectionError("Can't connect to database")
+        if not local_name:
+            local_name = "_".join(
+                [
+                    con_params["ip"],
+                    con_params["port"],
+                    con_params["database"],
+                    con_params["user"],
+                ]
+            )
+        if self._is_db_exists(local_name):
+            raise DatabaseAlreadyExistsError(local_name)
         new_database = BasesTable(
-            type=base_type, description=description, name=name, **con_params
+            type=base_type, description=description, local_name=local_name, **con_params
         )
 
         self.db_session.add(new_database)
@@ -208,4 +220,21 @@ class LocalBaseWorker:
     def is_main_admin_token_exists(self) -> bool:
         return "main admin token" in get_existing_data(
             self.db_session, TokenTable, "description"
+        )
+
+    def _is_db_exists(self, local_database_name: str) -> bool:
+        return local_database_name in get_existing_data(
+            self.db_session, BasesTable, "local_name"
+        )
+
+    def get_local_database_name(self, ip: str, port: str, database: str) -> str:
+        return (
+            self.db_session.query(TablesInfoTable)
+            .filter_by(
+                ip=ip,
+                port=port,
+                database=database,
+            )
+            .first()
+            .local_name
         )

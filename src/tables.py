@@ -23,10 +23,11 @@ class BasesTable(Base):
 
     type = Column(String)
     description = Column(String)
-    name = Column(String, primary_key=True)
+    local_name = Column(String, primary_key=True)
     ip = Column(String)
     port = Column(String)
     username = Column(String)
+    database = Column(String)
     password = Column(String)
 
 
