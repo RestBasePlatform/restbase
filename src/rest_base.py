@@ -118,6 +118,18 @@ def get_database_data():
     )
 
 
+@app.route("/ListTables", methods=["GET"])
+def list_databases():
+    token = flask.request.args.get("token")
+
+    if not token_worker.get_tokens_list(token):
+        return flask.make_response("Token not found.", 403)
+
+    return flask.make_response(
+        {"status": "success", "List": local_base_worker.get_token_tables(token)}
+    )
+
+
 @app.route("/GetData", methods=["GET"])
 def get_data_request():
     # Check if token has access to table
