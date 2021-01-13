@@ -127,6 +127,15 @@ class LocalBaseWorker:
             .first()
         )
 
+    def get_table_params(self, local_table_name: str) -> dict:
+        table_obj = self.get_table(local_table_name=local_table_name)
+        return {
+            "table_name": table_obj.table_name,
+            "folder_name": table_obj.folder_name,
+            "database_name": table_obj.database_name,
+            "columns": table_obj.columns,
+        }
+
     def get_database_object(self, local_database_name: str) -> BasesTable:
         return (
             self.db_session.query(BasesTable)
@@ -160,8 +169,11 @@ class LocalBaseWorker:
         self.db_session.add(new_token)
         self.db_session.commit()
 
-    def get_tokens_list(self) -> List[TokenTable]:
+    def get_tokens_objects_list(self) -> List[TokenTable]:
         return get_existing_data(self.db_session, TokenTable)
+
+    def get_tokens_list(self) -> List[str]:
+        return [i.token for i in self.get_tokens_objects_list()]
 
     def add_table_for_token(
         self,
@@ -239,6 +251,33 @@ class LocalBaseWorker:
             is not None
         )
 
+    def get_base_of_table(
+        self,
+        database_name: str = None,
+        folder_name: str = None,
+        table_name: str = None,
+        local_table_name: str = None,
+    ):
+        return (
+            (
+                self.db_session.query(TablesInfoTable)
+                .filter_by(local_name=local_table_name)
+                .first()
+                .database_name
+            )
+            if local_table_name
+            else (
+                self.db_session.query(TablesInfoTable)
+                .filter_by(
+                    database_name=database_name,
+                    folder_name=folder_name,
+                    table_name=table_name,
+                )
+                .first()
+                .database_name
+            )
+        )
+
     def get_db_type(self, local_table_name: str = None, db_name: str = None) -> str:
         if local_table_name:
             db_name = (
@@ -247,7 +286,9 @@ class LocalBaseWorker:
                 .first()
                 .database_name
             )
-        return self.db_session.query(BasesTable).filter_by(name=db_name).first().type
+        return (
+            self.db_session.query(BasesTable).filter_by(local_name=db_name).first().type
+        )
 
     @property
     def is_main_admin_token_exists(self) -> bool:

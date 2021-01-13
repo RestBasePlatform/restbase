@@ -65,4 +65,5 @@ class PostgreWorker(DatabaseWorker):
 
     def execute_get_data_request(self, request: str, return_type: str = "json"):
         if return_type == "json":
-            return pd.read_sql(request, con=self.engine).to_json(orient="columns")
+            tt = pd.read_sql(request, con=self.engine).to_json(orient="records")
+            return json.loads(json.dumps(tt, indent=4, sort_keys=True))

@@ -119,14 +119,32 @@ def get_database_data():
 
 
 @app.route("/ListTables", methods=["GET"])
-def list_databases():
+def list_tables():
     token = flask.request.args.get("token")
 
-    if not token_worker.get_tokens_list(token):
+    if not token not in local_base_worker.get_tokens_list():
         return flask.make_response("Token not found.", 403)
 
     return flask.make_response(
         {"status": "success", "List": local_base_worker.get_token_tables(token)}
+    )
+
+
+@app.route("/GetTableData", methods=["GET"])
+def get_table_data():
+    token = flask.request.args.get("token")
+    table_name = flask.request.args.get("local_table_name")
+    if token not in local_base_worker.get_tokens_list():
+        return flask.make_response("Token not found.", 403)
+
+    if table_name not in local_base_worker.get_token_tables(token):
+        return flask.make_response("Access for token denied", 403)
+
+    return flask.make_response(
+        {
+            "status": "success",
+            "TableData": local_base_worker.get_table_params(table_name),
+        }
     )
 
 
@@ -139,24 +157,23 @@ def get_data_request():
         flask.request.args, local_base_worker
     )
 
-    if local_table_name not in local_base_worker.get_local_name_list():
-        response = flask.Response("Table not found")
-        response.status_code = 404
-        return response
-
     if not token_worker.validate_access(token, local_table_name):
         return flask.make_response("Access denied", 403)
 
+    database_local_name = local_base_worker.get_base_of_table(
+        local_table_name=local_table_name
+    )
     query_builder = QueryBuilder(local_base_worker, flask.request.args)
     query = query_builder.get_query()
 
+    print(query)
     worker = get_worker(
         local_base_worker.get_db_type(local_table_name=local_table_name)
-    )
+    )(database_local_name, local_base_worker)
 
     return_data = worker.execute_get_data_request(query)
 
-    flask.make_response({"data": return_data}, 200)
+    return flask.make_response({"data": return_data}, 200)
 
 
 if __name__ == "__main__":

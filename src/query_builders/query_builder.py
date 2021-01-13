@@ -29,7 +29,7 @@ class QueryBuilder:
 
     def add_table_name(self):
         table_data = self.local_db_worker.get_table(
-            local_table_name=self.request["table"]
+            local_table_name=self.request["local_table_name"]
         )
 
         self.query = self.query.replace(
