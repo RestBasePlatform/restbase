@@ -5,11 +5,11 @@ import requests
 
 
 def test_generate_pre_defined_user_token(internal_db_session):
-    headers = {"token": "admin-test-token"}
+    headers = {"admin_token": "admin-test-token"}
 
     body = {"description": "test-description"}
 
-    body = {**body, "token": "test-token"}
+    body = {**body, "user_token": "test-token"}
     response = requests.get(
         "http://api/GenerateUserToken", headers=headers, params=body
     )
@@ -20,7 +20,7 @@ def test_generate_pre_defined_user_token(internal_db_session):
 
 
 def test_generate_random_user_token(internal_db_session):
-    headers = {"token": "admin-test-token"}
+    headers = {"admin_token": "admin-test-token"}
 
     response = requests.get("http://api/GenerateUserToken", headers=headers)
 
@@ -32,7 +32,7 @@ def test_generate_random_user_token(internal_db_session):
     tables = pd.read_sql("SELECT * FROM tokens", con=internal_db_session)
     assert response["new_token"] in tables["token"].values
 
-    body = {"token": response["new_token"]}
+    body = {"user_token": response["new_token"]}
     response = requests.get(
         "http://api/GenerateUserToken", headers=headers, params=body
     )
@@ -41,7 +41,7 @@ def test_generate_random_user_token(internal_db_session):
 
 
 def test_add_database(internal_db_session, postgre_db_data):
-    headers = {"token": "admin-test-token"}
+    headers = {"admin_token": "admin-test-token"}
 
     body = {"base_type": "postgres", "description": "test-base", **postgre_db_data}
 
@@ -63,19 +63,22 @@ def test_grant_table_access_with_local_table_name(internal_db_session, postgre_d
     assert requests.post("http://api/GrantTableAccess").status_code == 403
     assert (
         requests.post(
-            "http://api/GrantTableAccess", headers={"token": "some-random"}
+            "http://api/GrantTableAccess", headers={"admin_token": "some-random"}
         ).status_code
         == 403  # noqa: W503
     )
 
     # generate token for give access to
-    headers = {"token": "admin-test-token"}
+    headers = {"admin_token": "admin-test-token"}
 
-    body = {"description": "test-description", "token": "GrantTableAccessWithLocalName"}
+    body = {
+        "description": "test-description",
+        "user_token": "GrantTableAccessWithLocalName",
+    }
 
     requests.get("http://api/GenerateUserToken", headers=headers, params=body)
 
-    headers = {"token": "admin-test-token"}
+    headers = {"admin_token": "admin-test-token"}
     local_name = "_".join([postgre_db_data.get("local_name"), "public", "test_table_1"])
     body = {
         "user_token": "GrantTableAccessWithLocalName",
@@ -109,17 +112,17 @@ def test_grant_table_access_without_local_table_name(
     assert requests.post("http://api/GrantTableAccess").status_code == 403
     assert (
         requests.post(
-            "http://api/GrantTableAccess", headers={"token": "some-random"}
+            "http://api/GrantTableAccess", headers={"admin_token": "some-random"}
         ).status_code
         == 403  # noqa: W503
     )
 
     # generate token for give access to
-    headers = {"token": "admin-test-token"}
+    headers = {"admin_token": "admin-test-token"}
 
     body = {
         "description": "test-description",
-        "token": "GrantTableAccessWithoutLocalName",
+        "user_token": "GrantTableAccessWithoutLocalName",
     }
 
     requests.get("http://api/GenerateUserToken", headers=headers, params=body)
@@ -128,7 +131,7 @@ def test_grant_table_access_without_local_table_name(
     body = {
         "user_token": "GrantTableAccessWithoutLocalName",
         "database": postgre_db_data["local_name"],
-        "schema": "public",
+        "folder": "public",
         "table": "test_table_1",
     }
     response = requests.post(
@@ -152,7 +155,7 @@ def test_grant_table_access_without_local_table_name(
 
 
 def test_list_databases(internal_db_session, postgre_db_data):
-    headers = {"token": "admin-test-token"}
+    headers = {"admin_token": "admin-test-token"}
 
     response = requests.get("http://api/ListDatabase", headers=headers)
     response_body = json.loads(response.text)
