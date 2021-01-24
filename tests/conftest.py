@@ -2,21 +2,11 @@ import os
 import sys
 
 import pytest
+import sqlalchemy
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/")))
 
-
-@pytest.fixture
-def postgres_test_data():
-    return {
-        "type": "postgres",
-        "description": "test postgres base",
-        "name": "test_postgres",
-        "ip": "postgres",
-        "port": "5432",
-        "username": "postgres",
-        "password": "password",
-    }
+from utils import get_existing_data  # noqa: E402
 
 
 @pytest.fixture
@@ -31,9 +21,24 @@ def tables_data_postgres():
 
 
 @pytest.fixture
-def token_for_test():
+def internal_db_session():
+    main_db_string = "postgresql://postgres:password@postgres/postgres"
+    return sqlalchemy.create_engine(main_db_string)
+
+
+@pytest.fixture
+def postgre_db_data():
     return {
-        "token": "test-token",
-        "description": "some-description",
-        "granted_tables": [],
+        "local_name": "test-base",
+        "ip": "postgres_test_base",
+        "port": "5432",
+        "database": "postgres",
+        "username": "postgres",
+        "password": "password",
     }
+
+
+class Helpers:
+    @staticmethod
+    def get_column_data_from_table(session, table_object, col_name):
+        return get_existing_data(session, table_object, col_name)

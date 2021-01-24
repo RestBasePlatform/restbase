@@ -1,0 +1,44 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    networks:
+      - default
+
+  postgres_test_base:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    networks:
+      - default
+
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - postgres_test_base
+    environment:
+      STAGE: test
+    networks:
+      - default
+
+  tests:
+    build:
+      context: ..
+      dockerfile: Dockerfile_tests
+    depends_on:
+      - postgres
+      - postgres_test_base
+      - api
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

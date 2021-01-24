@@ -5,29 +5,24 @@ services:
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+    - "5432:5432"
     networks:
-      - default
-
-  postgres_test_base:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: password
-      POSTGRES_HOST_AUTH_METHOD: trust
-    networks:
-      - default
+      - restbase
 
   api:
     build:
       context: .
-      dockerfile: Dockerfile_tests
+      dockerfile: Dockerfile
     depends_on:
       - postgres
-      - postgres_test_base
     environment:
       STAGE: test
+    ports:
+      - "5000:80"
     networks:
-      - default
+      - restbase
 
 networks:
-  default:
+  restbase:
     driver: bridge

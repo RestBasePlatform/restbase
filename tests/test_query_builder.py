@@ -23,14 +23,14 @@ class TestQueryBuilder:
     @pytest.mark.parametrize(
         "request_body, query",
         [
-            ({"table": "test_table"}, "SELECT * FROM public.test_table"),
+            ({"local_table_name": "test_table"}, "SELECT * FROM public.test_table"),
             (
-                {"table": "test_table", "columns": ["column1", "column2"]},
+                {"local_table_name": "test_table", "columns": ["column1", "column2"]},
                 "SELECT column1, column2 from public.test_table",
             ),
             (
                 {
-                    "table": "test_table",
+                    "local_table_name": "test_table",
                     "columns": ["column1", "column2"],
                     "filter": {"column1": {"filter_type": ">", "value": 10}},
                 },
@@ -38,7 +38,7 @@ class TestQueryBuilder:
             ),
             (
                 {
-                    "table": "test_table",
+                    "local_table_name": "test_table",
                     "columns": ["column1", "column2"],
                     "filter": {
                         "column1": {"filter_type": ">", "value": 10},
@@ -50,7 +50,7 @@ class TestQueryBuilder:
             ),
             (
                 {
-                    "table": "test_table",
+                    "local_table_name": "test_table",
                     "columns": ["column1", "column2"],
                     "filter": {
                         "column1": {"filter_type": ">", "value": 10},
@@ -62,7 +62,7 @@ class TestQueryBuilder:
             ),
             (
                 {
-                    "table": "test_table",
+                    "local_table_name": "test_table",
                     "filter": {
                         "column1": {"filter_type": ">", "value": 10},
                         "column2": {"filter_type": ">", "value": 10},
@@ -73,7 +73,7 @@ class TestQueryBuilder:
             ),
             (
                 {
-                    "table": "test_table",
+                    "local_table_name": "test_table",
                     "filter": {
                         "column1": {"filter_type": ">", "value": 10},
                         "column2": {"filter_type": "<", "value": 100},

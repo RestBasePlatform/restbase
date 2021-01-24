@@ -46,14 +46,17 @@ class PostgreWorker(DatabaseWorker):
             .reset_index()
         )
         tables.columns = ["table_schema", "table_name", "columns"]
-
+        added_tables = []
         for _, row in tables.iterrows():
-            self.local_base_worker.write_table_params(
-                table_name=row["table_name"],
-                columns=row["columns"],
-                database_name=self.database_obj.local_name,
-                folder_name=row["table_schema"],
+            added_tables.append(
+                self.local_base_worker.write_table_params(
+                    table_name=row["table_name"],
+                    columns=row["columns"],
+                    database_name=self.database_obj.local_name,
+                    folder_name=row["table_schema"],
+                )
             )
+        return added_tables
 
     @staticmethod
     def row_dict_converter(row):
