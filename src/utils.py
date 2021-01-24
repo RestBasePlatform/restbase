@@ -5,6 +5,10 @@ from sqlalchemy.exc import OperationalError
 
 from db_workers import DatabaseWorker
 from db_workers import PostgreWorker
+from fields import DATABASE_NAME_FIELD_NAME
+from fields import FOLDER_NAME_FIELD_NAME
+from fields import LOCAL_TABLE_NAME_FILED_NAME
+from fields import TABLE_NAME_FIELD_NAME
 
 
 def validate_get_data_request_body(
@@ -42,12 +46,12 @@ def get_existing_data(
 
 def get_local_table_name_from_request(request_body: dict, local_worker):
     return (
-        request_body["local_table_name"]
-        if "local_table_name" in request_body
+        request_body[LOCAL_TABLE_NAME_FILED_NAME]
+        if LOCAL_TABLE_NAME_FILED_NAME in request_body
         else local_worker.get_local_table_name(
-            database_name=request_body["database"],
-            folder_name=request_body["schema"],
-            table_name=request_body["table"],
+            database_name=request_body[DATABASE_NAME_FIELD_NAME],
+            folder_name=request_body[FOLDER_NAME_FIELD_NAME],
+            table_name=request_body[TABLE_NAME_FIELD_NAME],
         )
     )
 
