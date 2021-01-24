@@ -9,5 +9,5 @@ class DatabaseWorker:
     def execute_get_data_request(self, request: str, return_type: str = "json"):
         pass
 
-    def download_table_list(self):
+    def download_table_list(self) -> list:
         pass

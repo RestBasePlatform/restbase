@@ -17,7 +17,7 @@ from utils import get_existing_data
 class LocalBaseWorker:
     def __init__(
         self,
-        ip="localhost",
+        ip="postgres",
         user="postgres",
         password="password",
         database_name="postgres",
@@ -80,7 +80,7 @@ class LocalBaseWorker:
         database_name: str,
         columns: dict,
         local_name: str = None,
-    ):
+    ) -> str:
 
         if not local_name:
             local_name = "_".join([database_name, folder_name, table_name])
@@ -100,11 +100,11 @@ class LocalBaseWorker:
         )
         if not exist_obj:
             self.db_session.add(new_table)
-            self.db_session.commit()
         else:
             for attr in ["table_name", "folder_name", "database_name", "columns"]:
                 setattr(exist_obj, attr, getattr(new_table, attr))
-            self.db_session.commit()
+        self.db_session.commit()
+        return local_name
 
     def get_table(
         self,
@@ -312,3 +312,10 @@ class LocalBaseWorker:
             .first()
             .local_name
         )
+
+    def get_database_tables(self, database_name: str):
+        tables = get_existing_data(self.db_session, TablesInfoTable)
+        import sys
+
+        print("aaaaa", tables, file=sys.stderr)
+        return [i.local_name for i in tables if i.database_name == database_name]

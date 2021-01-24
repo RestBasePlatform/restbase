@@ -9,4 +9,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: "tests"
-        run: docker-compose up --build --abort-on-container-exit
+        run: cd tests && docker-compose up --build --abort-on-container-exit

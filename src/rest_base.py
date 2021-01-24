@@ -1,3 +1,5 @@
+import os
+
 import flask
 
 from exceptions import AccessAlreadyGrantedError
@@ -9,6 +11,7 @@ from query_builders import QueryBuilder
 from token_worker import TokenWorker
 from utils import get_local_table_name_from_request
 from utils import get_worker
+
 
 app = flask.Flask("RestBase")
 
@@ -32,6 +35,11 @@ def generate_user_token():
 
     if not token_worker.is_token_admin(token):
         return flask.make_response("Access denied", 403)
+
+    if flask.request.args.get("token") in local_base_worker.get_tokens_list():
+        return flask.make_response(
+            {"status": "error", "message": "Token already exists"}, 409
+        )
 
     # If new token defined - add it to db else - generate new
     new_token = token_worker.add_token(
@@ -80,9 +88,14 @@ def add_database():
             password=flask.request.args.get("password"),
         )
 
-        worker = get_worker("postgres")(local_name, local_base_worker)
-        worker.download_table_list()
-
+        worker = get_worker(flask.request.args.get("base_type"))(
+            local_name, local_base_worker
+        )
+        tables = worker.download_table_list()
+        for local_table_name in tables:
+            local_base_worker.add_table_for_token(
+                token, local_table_name=local_table_name
+            )
         return flask.make_response({"status": "success", "local_name": local_name}, 200)
 
     except (DatabaseAlreadyExistsError, ConnectionError) as e:
@@ -97,7 +110,7 @@ def list_databases():
         return flask.make_response("Access denied", 403)
 
     return flask.make_response(
-        {"status": "success", "List": local_base_worker.get_db_name_list()}
+        {"status": "success", "List": local_base_worker.get_db_name_list()}, 200
     )
 
 
@@ -177,4 +190,11 @@ def get_data_request():
 
 
 if __name__ == "__main__":
-    app.run()
+    # ----------------------------------------------------------------------
+    print(os.listdir())
+    os.chdir("../alembic")
+    print(os.listdir())
+    os.system("alembic upgrade head")
+    os.chdir("../src")
+    # ----------------------------------------------------------------------
+    app.run(host="0.0.0.0", port=80)
