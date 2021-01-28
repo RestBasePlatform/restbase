@@ -75,3 +75,7 @@ def get_db_engine(db_type: str, **con_params):
             f"postgresql://{con_params.get('username')}:{con_params.get('password')}@"
             f"{con_params.get('ip')}:{con_params.get('port')}/{con_params.get('database')}"
         )
+
+
+def get_bad_request_answer() -> list:
+    return [{"status": "error", "message": "Incorrect request"}, 400]
