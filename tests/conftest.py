@@ -29,7 +29,7 @@ def internal_db_session():
 @pytest.fixture
 def postgre_db_data():
     return {
-        "local_name": "test-base",
+        "local_database_name": "test-base",
         "ip": "postgres_test_base",
         "port": "5432",
         "database": "postgres",

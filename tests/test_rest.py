@@ -59,13 +59,14 @@ def test_add_database(internal_db_session, postgre_db_data):
 
 def test_grant_table_access_with_local_table_name(internal_db_session, postgre_db_data):
 
-    # Check that for None token we got access denied
-    assert requests.post("http://api/GrantTableAccess").status_code == 403
+    # Check that for None token we got bad request
+    assert requests.post("http://api/GrantTableAccess").status_code == 400
     assert (
         requests.post(
-            "http://api/GrantTableAccess", headers={"admin_token": "some-random"}
+            "http://api/GrantTableAccess",
+            headers={"admin_token": "some-random"},
         ).status_code
-        == 403  # noqa: W503
+        == 400  # noqa: W503
     )
 
     # generate token for give access to
@@ -79,7 +80,9 @@ def test_grant_table_access_with_local_table_name(internal_db_session, postgre_d
     requests.get("http://api/GenerateUserToken", headers=headers, params=body)
 
     headers = {"admin_token": "admin-test-token"}
-    local_name = "_".join([postgre_db_data.get("local_name"), "public", "test_table_1"])
+    local_name = "_".join(
+        [postgre_db_data.get("local_database_name"), "public", "test_table_1"]
+    )
     body = {
         "user_token": "GrantTableAccessWithLocalName",
         "local_table_name": local_name,
@@ -109,12 +112,12 @@ def test_grant_table_access_without_local_table_name(
 ):
 
     # Check that for None token we got access denied
-    assert requests.post("http://api/GrantTableAccess").status_code == 403
+    assert requests.post("http://api/GrantTableAccess").status_code == 400
     assert (
         requests.post(
             "http://api/GrantTableAccess", headers={"admin_token": "some-random"}
         ).status_code
-        == 403  # noqa: W503
+        == 400  # noqa: W503
     )
 
     # generate token for give access to
@@ -127,10 +130,12 @@ def test_grant_table_access_without_local_table_name(
 
     requests.get("http://api/GenerateUserToken", headers=headers, params=body)
 
-    local_name = "_".join([postgre_db_data.get("local_name"), "public", "test_table_1"])
+    local_name = "_".join(
+        [postgre_db_data.get("local_database_name"), "public", "test_table_1"]
+    )
     body = {
         "user_token": "GrantTableAccessWithoutLocalName",
-        "database": postgre_db_data["local_name"],
+        "database": postgre_db_data["local_database_name"],
         "folder": "public",
         "table": "test_table_1",
     }
@@ -161,4 +166,4 @@ def test_list_databases(internal_db_session, postgre_db_data):
     response_body = json.loads(response.text)
     assert response.status_code == 200
 
-    assert set(response_body["List"]) == {postgre_db_data["local_name"]}
+    assert set(response_body["List"]) == {postgre_db_data["local_database_name"]}

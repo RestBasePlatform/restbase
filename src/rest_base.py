@@ -7,7 +7,15 @@ from exceptions import AdminTokenExistsError
 from exceptions import DatabaseAlreadyExistsError
 from exceptions import TableNotFoundError
 from fields import ADMIN_TOKEN_FIELD_NAME
+from fields import DATABASE_DB_NAME_FIELD_NAME
+from fields import DATABASE_IP_FIELD_NAME
+from fields import DATABASE_PASSWORD_FIELD_NAME
+from fields import DATABASE_PORT_FIELD_NAME
+from fields import DATABASE_TYPE_FIELD_NAME
+from fields import DATABASE_USER_FIELD_NAME
 from fields import DESCRIPTION_FIELD_NAME
+from fields import LOCAL_DATABASE_NAME_FIELD_NAME
+from fields import LOCAL_TABLE_NAME_FILED_NAME
 from fields import USER_TOKEN_FIELD_NAME
 from localbase import LocalBaseWorker
 from query_builders import QueryBuilder
@@ -94,17 +102,17 @@ def add_database():
 
     try:
         local_name = local_base_worker.add_database(
-            flask.request.args.get("base_type"),
-            flask.request.args.get("description"),
-            flask.request.args.get("local_name"),
-            ip=flask.request.args.get("ip"),
-            port=flask.request.args.get("port"),
-            database=flask.request.args.get("database"),
-            username=flask.request.args.get("username"),
-            password=flask.request.args.get("password"),
+            flask.request.args.get(DATABASE_TYPE_FIELD_NAME),
+            flask.request.args.get(DESCRIPTION_FIELD_NAME),
+            flask.request.args.get(LOCAL_DATABASE_NAME_FIELD_NAME),
+            ip=flask.request.args.get(DATABASE_IP_FIELD_NAME),
+            port=flask.request.args.get(DATABASE_PORT_FIELD_NAME),
+            database=flask.request.args.get(DATABASE_DB_NAME_FIELD_NAME),
+            username=flask.request.args.get(DATABASE_USER_FIELD_NAME),
+            password=flask.request.args.get(DATABASE_PASSWORD_FIELD_NAME),
         )
 
-        worker = get_worker(flask.request.args.get("base_type"))(
+        worker = get_worker(flask.request.args.get(DATABASE_TYPE_FIELD_NAME))(
             local_name, local_base_worker
         )
         tables = worker.download_table_list()
@@ -147,7 +155,7 @@ def get_database_data():
         {
             "status": "success",
             "Data": local_base_worker.get_database_data(
-                flask.request.args.get("local_database_name")
+                flask.request.args.get(LOCAL_DATABASE_NAME_FIELD_NAME)
             ),
         }
     )
@@ -174,7 +182,7 @@ def get_table_data():
         return flask.make_response(*get_bad_request_answer())
 
     token = flask.request.args.get(USER_TOKEN_FIELD_NAME)
-    table_name = flask.request.args.get("local_table_name")
+    table_name = flask.request.args.get(LOCAL_TABLE_NAME_FILED_NAME)
     if token not in local_base_worker.get_tokens_list():
         return flask.make_response("Token not found.", 403)
 

@@ -6,4 +6,4 @@ RUN pip3 install -r requirements.txt
 COPY . /app
 WORKDIR /app/src
 
-CMD ["python3" ,"rest_base.py"]
+CMD ["python3" ,"-u","rest_base.py"]
