@@ -7,11 +7,21 @@ from exceptions import AdminTokenExistsError
 from exceptions import DatabaseAlreadyExistsError
 from exceptions import TableNotFoundError
 from fields import ADMIN_TOKEN_FIELD_NAME
+from fields import DATABASE_DB_NAME_FIELD_NAME
+from fields import DATABASE_IP_FIELD_NAME
+from fields import DATABASE_PASSWORD_FIELD_NAME
+from fields import DATABASE_PORT_FIELD_NAME
+from fields import DATABASE_TYPE_FIELD_NAME
+from fields import DATABASE_USER_FIELD_NAME
 from fields import DESCRIPTION_FIELD_NAME
+from fields import LOCAL_DATABASE_NAME_FIELD_NAME
+from fields import LOCAL_TABLE_NAME_FILED_NAME
 from fields import USER_TOKEN_FIELD_NAME
 from localbase import LocalBaseWorker
 from query_builders import QueryBuilder
+from request_validator import RequestValidator
 from token_worker import TokenWorker
+from utils import get_bad_request_answer
 from utils import get_local_table_name_from_request
 from utils import get_worker
 
@@ -20,6 +30,7 @@ app = flask.Flask("RestBase")
 
 local_base_worker = LocalBaseWorker()
 token_worker = TokenWorker(local_base_worker)
+request_validator = RequestValidator()
 
 
 @app.route("/GetAdminToken", methods=["GET"])
@@ -33,6 +44,8 @@ def get_admin_token():
 
 @app.route("/GenerateUserToken", methods=["GET"])
 def generate_user_token():
+    if not request_validator.validate_generate_user_token(flask.request):
+        return flask.make_response(*get_bad_request_answer())
     token = flask.request.headers.get(ADMIN_TOKEN_FIELD_NAME)
 
     if not token_worker.is_token_admin(token):
@@ -56,6 +69,9 @@ def generate_user_token():
 
 @app.route("/GrantTableAccess", methods=["POST"])
 def grant_table_access():
+    if not request_validator.validate_grant_table_access(flask.request):
+        return flask.make_response(*get_bad_request_answer())
+
     token = flask.request.headers.get(ADMIN_TOKEN_FIELD_NAME)
 
     if not token_worker.is_token_admin(token):
@@ -76,6 +92,9 @@ def grant_table_access():
 
 @app.route("/AddDatabase", methods=["POST"])
 def add_database():
+    if not request_validator.validate_add_database_request(flask.request):
+        return flask.make_response(*get_bad_request_answer())
+
     token = flask.request.headers.get(ADMIN_TOKEN_FIELD_NAME)
 
     if not token_worker.is_token_admin(token):
@@ -83,17 +102,17 @@ def add_database():
 
     try:
         local_name = local_base_worker.add_database(
-            flask.request.args.get("base_type"),
-            flask.request.args.get("description"),
-            flask.request.args.get("local_name"),
-            ip=flask.request.args.get("ip"),
-            port=flask.request.args.get("port"),
-            database=flask.request.args.get("database"),
-            username=flask.request.args.get("username"),
-            password=flask.request.args.get("password"),
+            flask.request.args.get(DATABASE_TYPE_FIELD_NAME),
+            flask.request.args.get(DESCRIPTION_FIELD_NAME),
+            flask.request.args.get(LOCAL_DATABASE_NAME_FIELD_NAME),
+            ip=flask.request.args.get(DATABASE_IP_FIELD_NAME),
+            port=flask.request.args.get(DATABASE_PORT_FIELD_NAME),
+            database=flask.request.args.get(DATABASE_DB_NAME_FIELD_NAME),
+            username=flask.request.args.get(DATABASE_USER_FIELD_NAME),
+            password=flask.request.args.get(DATABASE_PASSWORD_FIELD_NAME),
         )
 
-        worker = get_worker(flask.request.args.get("base_type"))(
+        worker = get_worker(flask.request.args.get(DATABASE_TYPE_FIELD_NAME))(
             local_name, local_base_worker
         )
         tables = worker.download_table_list()
@@ -109,6 +128,9 @@ def add_database():
 
 @app.route("/ListDatabase", methods=["GET"])
 def list_databases():
+    if not request_validator.validate_list_databases_request(flask.request):
+        return flask.make_response(*get_bad_request_answer())
+
     token = flask.request.headers.get(ADMIN_TOKEN_FIELD_NAME)
 
     if not token_worker.is_token_admin(token):
@@ -121,6 +143,9 @@ def list_databases():
 
 @app.route("/GetDatabaseData", methods=["GET"])
 def get_database_data():
+    if not request_validator.validate_get_database_data_request(flask.request):
+        return flask.make_response(*get_bad_request_answer())
+
     token = flask.request.headers.get(ADMIN_TOKEN_FIELD_NAME)
 
     if not token_worker.is_token_admin(token):
@@ -130,7 +155,7 @@ def get_database_data():
         {
             "status": "success",
             "Data": local_base_worker.get_database_data(
-                flask.request.args.get("local_database_name")
+                flask.request.args.get(LOCAL_DATABASE_NAME_FIELD_NAME)
             ),
         }
     )
@@ -138,7 +163,10 @@ def get_database_data():
 
 @app.route("/ListTables", methods=["GET"])
 def list_tables():
-    token = flask.request.args.get(ADMIN_TOKEN_FIELD_NAME)
+    if not request_validator.validate_list_tables_request(flask.request):
+        return flask.make_response(*get_bad_request_answer())
+
+    token = flask.request.args.get(USER_TOKEN_FIELD_NAME)
 
     if not token not in local_base_worker.get_tokens_list():
         return flask.make_response("Token not found.", 403)
@@ -150,8 +178,11 @@ def list_tables():
 
 @app.route("/GetTableData", methods=["GET"])
 def get_table_data():
-    token = flask.request.args.get(ADMIN_TOKEN_FIELD_NAME)
-    table_name = flask.request.args.get("local_table_name")
+    if not request_validator.validate_get_table_data_request(flask.request):
+        return flask.make_response(*get_bad_request_answer())
+
+    token = flask.request.args.get(USER_TOKEN_FIELD_NAME)
+    table_name = flask.request.args.get(LOCAL_TABLE_NAME_FILED_NAME)
     if token not in local_base_worker.get_tokens_list():
         return flask.make_response("Token not found.", 403)
 
@@ -168,8 +199,11 @@ def get_table_data():
 
 @app.route("/GetData", methods=["GET"])
 def get_data_request():
+    if not request_validator.validate_get_data_request(flask.request):
+        return flask.make_response(*get_bad_request_answer())
+
     # Check if token has access to table
-    token = flask.request.headers.get(ADMIN_TOKEN_FIELD_NAME)
+    token = flask.request.args.get(USER_TOKEN_FIELD_NAME)
     print(token)
     local_table_name = get_local_table_name_from_request(
         flask.request.args, local_base_worker
