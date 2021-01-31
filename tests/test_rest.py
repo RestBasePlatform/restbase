@@ -53,7 +53,7 @@ def test_add_database(internal_db_session, postgre_db_data):
     response = requests.post(
         "http://api:54541/AddDatabase", headers=headers, params=body
     )
-    assert response.status_code == 409
+    assert response.status_code == 500
 
     tables = pd.read_sql("SELECT * FROM tables_info", con=internal_db_session)
     bases = pd.read_sql("SELECT * FROM bases", con=internal_db_session)

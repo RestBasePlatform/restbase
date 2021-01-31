@@ -35,6 +35,10 @@ class RequestValidator:
         )
 
     @staticmethod
+    def check_if_database_type_is_supported(db_type: str):
+        return db_type in ["postgres"]
+
+    @staticmethod
     def is_all_database_params_defined(request_args: dict) -> bool:
         return all(
             i in request_args
@@ -63,20 +67,22 @@ class RequestValidator:
 
     def validate_add_database_request(self, request: flask.request):
         is_local_database_name_defined = LOCAL_DATABASE_NAME_FIELD_NAME in request.args
-        print(is_local_database_name_defined)
         print(self.is_all_database_params_defined(request.args))
         print(self.is_header_valid(request.headers))
         return (
             is_local_database_name_defined
             and self.is_all_database_params_defined(request.args)
             and self.is_header_valid(request.headers)
+            and self.check_if_database_type_is_supported(
+                request.args.get(DATABASE_TYPE_FIELD_NAME)
+            )
         )
 
     def validate_list_databases_request(self, request: flask.request):
         return self.is_header_valid(request.headers)
 
     def validate_get_database_data_request(self, request: flask.request):
-        return LOCAL_TABLE_NAME_FILED_NAME in request.args and self.is_header_valid(
+        return LOCAL_DATABASE_NAME_FIELD_NAME in request.args and self.is_header_valid(
             request.headers
         )
 
