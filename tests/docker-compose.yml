@@ -6,7 +6,8 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_HOST_AUTH_METHOD: trust
     networks:
-      - default
+      restbase_test_network:
+        ipv4_address: "10.5.0.5"
 
   postgres_test_base:
     image: postgres
@@ -14,31 +15,41 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_HOST_AUTH_METHOD: trust
     networks:
-      - default
+      restbase_test_network:
+        ipv4_address: "10.5.0.2"
 
   api:
     build:
       context: ..
       dockerfile: Dockerfile
     depends_on:
-      - postgres
       - postgres_test_base
+      - postgres
     environment:
       STAGE: test
+    ports:
+      - "54541:54541"
+      - "5432:5432"
     networks:
-      - default
+      restbase_test_network:
+        ipv4_address: "10.5.0.3"
 
   tests:
     build:
       context: ..
       dockerfile: Dockerfile_tests
     depends_on:
-      - postgres
       - postgres_test_base
       - api
+      - postgres
     networks:
-      - default
+      restbase_test_network:
+        ipv4_address: "10.5.0.4"
 
 networks:
-  default:
+  restbase_test_network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1

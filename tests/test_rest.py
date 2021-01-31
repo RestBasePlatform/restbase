@@ -11,7 +11,7 @@ def test_generate_pre_defined_user_token(internal_db_session):
 
     body = {**body, "user_token": "test-token"}
     response = requests.get(
-        "http://api/GenerateUserToken", headers=headers, params=body
+        "http://api:54541/GenerateUserToken", headers=headers, params=body
     )
 
     assert response.status_code == 201
@@ -22,7 +22,7 @@ def test_generate_pre_defined_user_token(internal_db_session):
 def test_generate_random_user_token(internal_db_session):
     headers = {"admin_token": "admin-test-token"}
 
-    response = requests.get("http://api/GenerateUserToken", headers=headers)
+    response = requests.get("http://api:54541/GenerateUserToken", headers=headers)
 
     assert response.status_code == 201
 
@@ -34,7 +34,7 @@ def test_generate_random_user_token(internal_db_session):
 
     body = {"user_token": response["new_token"]}
     response = requests.get(
-        "http://api/GenerateUserToken", headers=headers, params=body
+        "http://api:54541/GenerateUserToken", headers=headers, params=body
     )
 
     assert response.status_code == 409
@@ -45,10 +45,14 @@ def test_add_database(internal_db_session, postgre_db_data):
 
     body = {"base_type": "postgres", "description": "test-base", **postgre_db_data}
 
-    response = requests.post("http://api/AddDatabase", headers=headers, params=body)
+    response = requests.post(
+        "http://api:54541/AddDatabase", headers=headers, params=body
+    )
     assert response.status_code == 200
     # Check that cant add the same base again
-    response = requests.post("http://api/AddDatabase", headers=headers, params=body)
+    response = requests.post(
+        "http://api:54541/AddDatabase", headers=headers, params=body
+    )
     assert response.status_code == 409
 
     tables = pd.read_sql("SELECT * FROM tables_info", con=internal_db_session)
@@ -60,10 +64,10 @@ def test_add_database(internal_db_session, postgre_db_data):
 def test_grant_table_access_with_local_table_name(internal_db_session, postgre_db_data):
 
     # Check that for None token we got bad request
-    assert requests.post("http://api/GrantTableAccess").status_code == 400
+    assert requests.post("http://api:54541/GrantTableAccess").status_code == 400
     assert (
         requests.post(
-            "http://api/GrantTableAccess",
+            "http://api:54541/GrantTableAccess",
             headers={"admin_token": "some-random"},
         ).status_code
         == 400  # noqa: W503
@@ -77,7 +81,7 @@ def test_grant_table_access_with_local_table_name(internal_db_session, postgre_d
         "user_token": "GrantTableAccessWithLocalName",
     }
 
-    requests.get("http://api/GenerateUserToken", headers=headers, params=body)
+    requests.get("http://api:54541/GenerateUserToken", headers=headers, params=body)
 
     headers = {"admin_token": "admin-test-token"}
     local_name = "_".join(
@@ -88,13 +92,13 @@ def test_grant_table_access_with_local_table_name(internal_db_session, postgre_d
         "local_table_name": local_name,
     }
     response = requests.post(
-        "http://api/GrantTableAccess", headers=headers, params=body
+        "http://api:54541/GrantTableAccess", headers=headers, params=body
     )
     assert response.status_code == 200
 
     # Check that we cant grant access to the same table again
     response = requests.post(
-        "http://api/GrantTableAccess", headers=headers, params=body
+        "http://api:54541/GrantTableAccess", headers=headers, params=body
     )
     assert response.status_code == 404
 
@@ -112,10 +116,10 @@ def test_grant_table_access_without_local_table_name(
 ):
 
     # Check that for None token we got access denied
-    assert requests.post("http://api/GrantTableAccess").status_code == 400
+    assert requests.post("http://api:54541/GrantTableAccess").status_code == 400
     assert (
         requests.post(
-            "http://api/GrantTableAccess", headers={"admin_token": "some-random"}
+            "http://api:54541/GrantTableAccess", headers={"admin_token": "some-random"}
         ).status_code
         == 400  # noqa: W503
     )
@@ -128,7 +132,7 @@ def test_grant_table_access_without_local_table_name(
         "user_token": "GrantTableAccessWithoutLocalName",
     }
 
-    requests.get("http://api/GenerateUserToken", headers=headers, params=body)
+    requests.get("http://api:54541/GenerateUserToken", headers=headers, params=body)
 
     local_name = "_".join(
         [postgre_db_data.get("local_database_name"), "public", "test_table_1"]
@@ -140,13 +144,13 @@ def test_grant_table_access_without_local_table_name(
         "table": "test_table_1",
     }
     response = requests.post(
-        "http://api/GrantTableAccess", headers=headers, params=body
+        "http://api:54541/GrantTableAccess", headers=headers, params=body
     )
     assert response.status_code == 200
 
     # Check that we cant grant access to the same table again
     response = requests.post(
-        "http://api/GrantTableAccess", headers=headers, params=body
+        "http://api:54541/GrantTableAccess", headers=headers, params=body
     )
     assert response.status_code == 404
 
@@ -162,7 +166,7 @@ def test_grant_table_access_without_local_table_name(
 def test_list_databases(internal_db_session, postgre_db_data):
     headers = {"admin_token": "admin-test-token"}
 
-    response = requests.get("http://api/ListDatabase", headers=headers)
+    response = requests.get("http://api:54541/ListDatabase", headers=headers)
     response_body = json.loads(response.text)
     assert response.status_code == 200
 

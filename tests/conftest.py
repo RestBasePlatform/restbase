@@ -22,7 +22,7 @@ def tables_data_postgres():
 
 @pytest.fixture
 def internal_db_session():
-    main_db_string = "postgresql://postgres:password@postgres/postgres"
+    main_db_string = "postgresql://postgres:password@api/postgres"
     return sqlalchemy.create_engine(main_db_string)
 
 

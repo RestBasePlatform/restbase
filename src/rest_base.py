@@ -27,8 +27,8 @@ from utils import get_worker
 
 app = flask.Flask("RestBase")
 
-
 local_base_worker = LocalBaseWorker()
+
 token_worker = TokenWorker(local_base_worker)
 request_validator = RequestValidator()
 
@@ -59,7 +59,7 @@ def generate_user_token():
             {"status": "error", "message": "Token already exists"}, 409
         )
 
-    # If new token defined - add it to db else - generate new
+    # If new token defined - add it to db else - generate
     new_token = token_worker.add_token(
         token=flask.request.args.get(USER_TOKEN_FIELD_NAME),
         description=flask.request.args.get(DESCRIPTION_FIELD_NAME),
@@ -228,11 +228,6 @@ def get_data_request():
 
 
 if __name__ == "__main__":
-    # ----------------------------------------------------------------------
-    print(os.listdir())
-    os.chdir("../alembic")
-    print(os.listdir())
-    os.system("alembic upgrade head")
-    os.chdir("../src")
-    # ----------------------------------------------------------------------
-    app.run(host="0.0.0.0", port=80)
+    if os.getenv("STAGE") == "test":
+        local_base_worker.add_test_token()
+    app.run(host="0.0.0.0", port=54541)

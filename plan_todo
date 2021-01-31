@@ -58,8 +58,8 @@ PLAN                                                                            
     1) generate token
     2) validate token (is token has access to table)
     3) remove token
-[] REST worker for incoming GET requests (manage requests)
-[] REST worker for responses (transform data to json)
+[x] REST worker for incoming GET requests (manage requests)
+[x] REST worker for responses (transform data to json)
 [] Combine ALL
 [] Release 0.1
 [] Logs to external database support

@@ -17,7 +17,7 @@ from utils import get_existing_data
 class LocalBaseWorker:
     def __init__(
         self,
-        ip="postgres",
+        ip="localhost",
         user="postgres",
         password="password",
         database_name="postgres",
@@ -315,7 +315,26 @@ class LocalBaseWorker:
 
     def get_database_tables(self, database_name: str):
         tables = get_existing_data(self.db_session, TablesInfoTable)
-        import sys
 
-        print("aaaaa", tables, file=sys.stderr)
         return [i.local_name for i in tables if i.database_name == database_name]
+
+    @staticmethod
+    def add_test_token():
+        """
+        TEMP METHOD TO PREPARE DATABASE FOR TESTS
+        """
+        # Set admin token
+        db_str = "postgresql://postgres:password@localhost/postgres"
+        internal_db_engine = create_engine(db_str)
+        import pandas as pd
+
+        pd.DataFrame(
+            [["admin-test-token", "main admin token", [], True]],
+            columns=["token", "description", "granted_tables", "admin_access"],
+        ).to_sql(
+            "tokens",
+            if_exists="append",
+            index=False,
+            con=internal_db_engine,
+            schema="public",
+        )
