@@ -5,13 +5,13 @@ import requests
 
 
 def test_generate_pre_defined_user_token(internal_db_session):
-    headers = {"token": "admin-test-token"}
+    headers = {"admin_token": "admin-test-token"}
 
     body = {"description": "test-description"}
 
-    body = {**body, "token": "test-token"}
+    body = {**body, "user_token": "test-token"}
     response = requests.get(
-        "http://api/GenerateUserToken", headers=headers, params=body
+        "http://api:54541/GenerateUserToken", headers=headers, params=body
     )
 
     assert response.status_code == 201
@@ -20,9 +20,9 @@ def test_generate_pre_defined_user_token(internal_db_session):
 
 
 def test_generate_random_user_token(internal_db_session):
-    headers = {"token": "admin-test-token"}
+    headers = {"admin_token": "admin-test-token"}
 
-    response = requests.get("http://api/GenerateUserToken", headers=headers)
+    response = requests.get("http://api:54541/GenerateUserToken", headers=headers)
 
     assert response.status_code == 201
 
@@ -32,23 +32,27 @@ def test_generate_random_user_token(internal_db_session):
     tables = pd.read_sql("SELECT * FROM tokens", con=internal_db_session)
     assert response["new_token"] in tables["token"].values
 
-    body = {"token": response["new_token"]}
+    body = {"user_token": response["new_token"]}
     response = requests.get(
-        "http://api/GenerateUserToken", headers=headers, params=body
+        "http://api:54541/GenerateUserToken", headers=headers, params=body
     )
 
     assert response.status_code == 409
 
 
 def test_add_database(internal_db_session, postgre_db_data):
-    headers = {"token": "admin-test-token"}
+    headers = {"admin_token": "admin-test-token"}
 
     body = {"base_type": "postgres", "description": "test-base", **postgre_db_data}
 
-    response = requests.post("http://api/AddDatabase", headers=headers, params=body)
+    response = requests.post(
+        "http://api:54541/AddDatabase", headers=headers, params=body
+    )
     assert response.status_code == 200
     # Check that cant add the same base again
-    response = requests.post("http://api/AddDatabase", headers=headers, params=body)
+    response = requests.post(
+        "http://api:54541/AddDatabase", headers=headers, params=body
+    )
     assert response.status_code == 409
 
     tables = pd.read_sql("SELECT * FROM tables_info", con=internal_db_session)
@@ -59,36 +63,42 @@ def test_add_database(internal_db_session, postgre_db_data):
 
 def test_grant_table_access_with_local_table_name(internal_db_session, postgre_db_data):
 
-    # Check that for None token we got access denied
-    assert requests.post("http://api/GrantTableAccess").status_code == 403
+    # Check that for None token we got bad request
+    assert requests.post("http://api:54541/GrantTableAccess").status_code == 400
     assert (
         requests.post(
-            "http://api/GrantTableAccess", headers={"token": "some-random"}
+            "http://api:54541/GrantTableAccess",
+            headers={"admin_token": "some-random"},
         ).status_code
-        == 403  # noqa: W503
+        == 400  # noqa: W503
     )
 
     # generate token for give access to
-    headers = {"token": "admin-test-token"}
+    headers = {"admin_token": "admin-test-token"}
 
-    body = {"description": "test-description", "token": "GrantTableAccessWithLocalName"}
+    body = {
+        "description": "test-description",
+        "user_token": "GrantTableAccessWithLocalName",
+    }
 
-    requests.get("http://api/GenerateUserToken", headers=headers, params=body)
+    requests.get("http://api:54541/GenerateUserToken", headers=headers, params=body)
 
-    headers = {"token": "admin-test-token"}
-    local_name = "_".join([postgre_db_data.get("local_name"), "public", "test_table_1"])
+    headers = {"admin_token": "admin-test-token"}
+    local_name = "_".join(
+        [postgre_db_data.get("local_database_name"), "public", "test_table_1"]
+    )
     body = {
         "user_token": "GrantTableAccessWithLocalName",
         "local_table_name": local_name,
     }
     response = requests.post(
-        "http://api/GrantTableAccess", headers=headers, params=body
+        "http://api:54541/GrantTableAccess", headers=headers, params=body
     )
     assert response.status_code == 200
 
     # Check that we cant grant access to the same table again
     response = requests.post(
-        "http://api/GrantTableAccess", headers=headers, params=body
+        "http://api:54541/GrantTableAccess", headers=headers, params=body
     )
     assert response.status_code == 404
 
@@ -106,39 +116,41 @@ def test_grant_table_access_without_local_table_name(
 ):
 
     # Check that for None token we got access denied
-    assert requests.post("http://api/GrantTableAccess").status_code == 403
+    assert requests.post("http://api:54541/GrantTableAccess").status_code == 400
     assert (
         requests.post(
-            "http://api/GrantTableAccess", headers={"token": "some-random"}
+            "http://api:54541/GrantTableAccess", headers={"admin_token": "some-random"}
         ).status_code
-        == 403  # noqa: W503
+        == 400  # noqa: W503
     )
 
     # generate token for give access to
-    headers = {"token": "admin-test-token"}
+    headers = {"admin_token": "admin-test-token"}
 
     body = {
         "description": "test-description",
-        "token": "GrantTableAccessWithoutLocalName",
+        "user_token": "GrantTableAccessWithoutLocalName",
     }
 
-    requests.get("http://api/GenerateUserToken", headers=headers, params=body)
+    requests.get("http://api:54541/GenerateUserToken", headers=headers, params=body)
 
-    local_name = "_".join([postgre_db_data.get("local_name"), "public", "test_table_1"])
+    local_name = "_".join(
+        [postgre_db_data.get("local_database_name"), "public", "test_table_1"]
+    )
     body = {
         "user_token": "GrantTableAccessWithoutLocalName",
-        "database": postgre_db_data["local_name"],
-        "schema": "public",
+        "database": postgre_db_data["local_database_name"],
+        "folder": "public",
         "table": "test_table_1",
     }
     response = requests.post(
-        "http://api/GrantTableAccess", headers=headers, params=body
+        "http://api:54541/GrantTableAccess", headers=headers, params=body
     )
     assert response.status_code == 200
 
     # Check that we cant grant access to the same table again
     response = requests.post(
-        "http://api/GrantTableAccess", headers=headers, params=body
+        "http://api:54541/GrantTableAccess", headers=headers, params=body
     )
     assert response.status_code == 404
 
@@ -152,10 +164,10 @@ def test_grant_table_access_without_local_table_name(
 
 
 def test_list_databases(internal_db_session, postgre_db_data):
-    headers = {"token": "admin-test-token"}
+    headers = {"admin_token": "admin-test-token"}
 
-    response = requests.get("http://api/ListDatabase", headers=headers)
+    response = requests.get("http://api:54541/ListDatabase", headers=headers)
     response_body = json.loads(response.text)
     assert response.status_code == 200
 
-    assert set(response_body["List"]) == {postgre_db_data["local_name"]}
+    assert set(response_body["List"]) == {postgre_db_data["local_database_name"]}

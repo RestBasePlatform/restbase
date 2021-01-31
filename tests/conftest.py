@@ -22,14 +22,14 @@ def tables_data_postgres():
 
 @pytest.fixture
 def internal_db_session():
-    main_db_string = "postgresql://postgres:password@postgres/postgres"
+    main_db_string = "postgresql://postgres:password@api/postgres"
     return sqlalchemy.create_engine(main_db_string)
 
 
 @pytest.fixture
 def postgre_db_data():
     return {
-        "local_name": "test-base",
+        "local_database_name": "test-base",
         "ip": "postgres_test_base",
         "port": "5432",
         "database": "postgres",
