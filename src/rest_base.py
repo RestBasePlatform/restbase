@@ -37,7 +37,7 @@ request_validator = RequestValidator()
 def get_admin_token():
     try:
         new_token = token_worker.add_admin_token()
-        return flask.make_response(new_token, 200)
+        return flask.make_response({"admin-token": new_token}, 200)
     except AdminTokenExistsError:
         return flask.make_response("Admin token already exists", 409)
 
@@ -123,7 +123,7 @@ def add_database():
         return flask.make_response({"status": "success", "local_name": local_name}, 200)
 
     except (DatabaseAlreadyExistsError, ConnectionError) as e:
-        return flask.make_response({"status": "failed", "error": str(e)}, 409)
+        return flask.make_response({"status": "failed", "error": str(e)}, 500)
 
 
 @app.route("/ListDatabase", methods=["GET"])
@@ -150,6 +150,9 @@ def get_database_data():
 
     if not token_worker.is_token_admin(token):
         return flask.make_response("Access denied", 403)
+
+    if flask.request.args.get(LOCAL_DATABASE_NAME_FIELD_NAME):
+        return flask.make_response("Database not found", 404)
 
     return flask.make_response(
         {
