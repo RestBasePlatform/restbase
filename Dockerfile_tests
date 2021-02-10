@@ -7,4 +7,4 @@ COPY . /app
 WORKDIR /app
 
 
-ENTRYPOINT bash postgres_waiter.sh postgres_test_base && cd tests/ && python3 db_preparation.py && cd ../ &&  sleep 5 && pytest -v
+ENTRYPOINT bash postgres_waiter.sh postgres_test_base && cd tests/ && python3 db_preparation.py && cd ../ &&  sleep 10 && pytest -v

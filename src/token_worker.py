@@ -43,7 +43,5 @@ class TokenWorker:
 
     def is_token_admin(self, token) -> bool:
         return token in [
-            i.token
-            for i in self.local_base_worker.get_tokens_objects_list()
-            if i.admin_access
+            i.token for i in self.local_base_worker.get_admin_tokens_objects_list()
         ]

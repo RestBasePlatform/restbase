@@ -22,6 +22,7 @@ entrypoints==0.3
 filelock==3.0.12
 flake8==3.8.4
 Flask==1.1.2
+Flask-RESTful==0.3.8
 Flask-SQLAlchemy==2.4.4
 identify==1.5.11
 idna==2.10
