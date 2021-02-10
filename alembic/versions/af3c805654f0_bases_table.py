@@ -24,10 +24,10 @@ def upgrade():
         sa.Column("type", sa.String(64), nullable=False),
         sa.Column("description", sa.String(200)),
         sa.Column("local_name", sa.String(200), nullable=False, primary_key=True),
-        sa.Column("ip", sa.String(20), nullable=False),
-        sa.Column("port", sa.String(4), nullable=False),
-        sa.Column("database", sa.String(32), nullable=False),
-        sa.Column("username", sa.String(64), nullable=False),
+        sa.Column("ip", sa.String(150), nullable=False),
+        sa.Column("port", sa.String(6), nullable=False),
+        sa.Column("database", sa.String(50), nullable=False),
+        sa.Column("username", sa.String(256), nullable=False),
         sa.Column("password", sa.String(256), nullable=False),
     )
 

@@ -1,3 +1,4 @@
+import datetime
 from typing import List
 
 from sqlalchemy import create_engine
@@ -164,16 +165,28 @@ class LocalBaseWorker:
             description=description,
             granted_tables=[],
             admin_access=is_admin,
+            create_date=datetime.datetime.now(),
         )
 
         self.db_session.add(new_token)
         self.db_session.commit()
 
-    def get_tokens_objects_list(self) -> List[TokenTable]:
-        return get_existing_data(self.db_session, TokenTable)
+    def get_user_tokens_objects_list(self) -> List[TokenTable]:
+        # Returns only tokens without admin access
+        return [
+            i
+            for i in get_existing_data(self.db_session, TokenTable)
+            if not i.admin_access
+        ]
+
+    def get_admin_tokens_objects_list(self) -> List[TokenTable]:
+        # Returns only tokens with access
+        return [
+            i for i in get_existing_data(self.db_session, TokenTable) if i.admin_access
+        ]
 
     def get_tokens_list(self) -> List[str]:
-        return [i.token for i in self.get_tokens_objects_list()]
+        return [i.token for i in self.get_user_tokens_objects_list()]
 
     def add_table_for_token(
         self,

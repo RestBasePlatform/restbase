@@ -1,5 +1,6 @@
 from sqlalchemy import Boolean
 from sqlalchemy import Column
+from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy import String
 from sqlalchemy.dialects import postgresql
@@ -16,6 +17,7 @@ class TokenTable(Base):
     description = Column(String)
     granted_tables = Column(postgresql.ARRAY(postgresql.TEXT, dimensions=1))
     admin_access = Column(Boolean)
+    create_date = Column(DateTime)
 
 
 class BasesTable(Base):
