@@ -159,8 +159,9 @@ class LocalBaseWorker:
     def get_local_name_list(self) -> list:
         return get_existing_data(self.db_session, TablesInfoTable, "local_name")
 
-    def add_token(self, new_token: str, description: str, is_admin=False):
+    def add_token(self, name: str, new_token: str, description: str, is_admin=False):
         new_token = TokenTable(
+            name=name,
             token=new_token,
             description=description,
             granted_tables=[],
@@ -187,6 +188,9 @@ class LocalBaseWorker:
 
     def get_tokens_list(self) -> List[str]:
         return [i.token for i in self.get_user_tokens_objects_list()]
+
+    def get_tokens_names_list(self) -> List[str]:
+        return [i.name for i in self.get_user_tokens_objects_list()]
 
     def add_table_for_token(
         self,

@@ -6,6 +6,7 @@ from .common_rest import RestCommon
 from fields import ADMIN_TOKEN_FIELD_NAME
 from fields import DESCRIPTION_FIELD_NAME
 from fields import USER_TOKEN_FIELD_NAME
+from fields import USER_TOKEN_NAME_FIELD_NAME
 
 
 class UserToken(Resource):
@@ -25,6 +26,9 @@ class UserToken(Resource):
         if (
             request.args.get(USER_TOKEN_FIELD_NAME)
             in self.rest_helper.local_worker.get_tokens_list()
+        ) or (
+            request.args.get(USER_TOKEN_FIELD_NAME)
+            in self.rest_helper.local_worker.get_tokens_names_list()
         ):
             return make_response(
                 {"status": "error", "message": "Token already exists"}, 409
@@ -33,6 +37,7 @@ class UserToken(Resource):
         new_token = self.rest_helper.token_worker.add_token(
             token=request.args.get(USER_TOKEN_FIELD_NAME),
             description=request.args.get(DESCRIPTION_FIELD_NAME),
+            token_name=request.args.get(USER_TOKEN_NAME_FIELD_NAME),
         )
         return make_response({"status": "success", "new_token": new_token}, 201)
 
