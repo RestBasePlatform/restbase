@@ -1,6 +1,8 @@
 ADMIN_TOKEN_FIELD_NAME = "admin_token"
 USER_TOKEN_FIELD_NAME = "user_token"
 
+USER_TOKEN_NAME_FIELD_NAME = "token_name"
+
 DESCRIPTION_FIELD_NAME = "description"
 
 LOCAL_TABLE_NAME_FILED_NAME = "local_table_name"

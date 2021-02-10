@@ -26,6 +26,7 @@ def upgrade():
         sa.Column("granted_tables", postgresql.ARRAY(postgresql.TEXT, dimensions=1)),
         sa.Column("admin_access", sa.Boolean()),
         sa.Column("create_date", sa.DateTime()),
+        sa.Column("name", sa.String(), unique=True),
     )
 
 

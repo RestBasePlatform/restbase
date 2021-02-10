@@ -18,6 +18,7 @@ class TokenTable(Base):
     granted_tables = Column(postgresql.ARRAY(postgresql.TEXT, dimensions=1))
     admin_access = Column(Boolean)
     create_date = Column(DateTime)
+    name = Column(String)
 
 
 class BasesTable(Base):

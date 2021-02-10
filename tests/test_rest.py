@@ -16,7 +16,10 @@ import requests
 def test_generate_pre_defined_user_token(internal_db_session):
     headers = {"admin_token": "admin-test-token"}
 
-    body = {"description": "test-description"}
+    body = {
+        "description": "test-description",
+        "token_name": "test_generate_pre_defined_user_token",
+    }
 
     body = {**body, "user_token": "test-token"}
     response = requests.put(
@@ -30,8 +33,14 @@ def test_generate_pre_defined_user_token(internal_db_session):
 
 def test_generate_random_user_token(internal_db_session):
     headers = {"admin_token": "admin-test-token"}
+    body = {
+        "description": "test-description",
+        "token_name": "test_generate_random_user_token",
+    }
 
-    response = requests.put("http://api:54541/GenerateUserToken", headers=headers)
+    response = requests.put(
+        "http://api:54541/GenerateUserToken", headers=headers, params=body
+    )
 
     assert response.status_code == 201
 
@@ -41,7 +50,10 @@ def test_generate_random_user_token(internal_db_session):
     tables = pd.read_sql("SELECT * FROM tokens", con=internal_db_session)
     assert response["new_token"] in tables["token"].values
 
-    body = {"user_token": response["new_token"]}
+    body = {
+        "user_token": response["new_token"],
+        "token_name": "test_generate_random_user_token",
+    }
     response = requests.put(
         "http://api:54541/GenerateUserToken", headers=headers, params=body
     )
@@ -84,6 +96,7 @@ def test_grant_table_access_with_local_table_name(internal_db_session, postgre_d
     body = {
         "description": "test-description",
         "user_token": "GrantTableAccessWithLocalName",
+        "token_name": "test_grant_table_access_with_local_table_name",
     }
 
     requests.put("http://api:54541//GenerateUserToken", headers=headers, params=body)
@@ -135,6 +148,7 @@ def test_grant_table_access_without_local_table_name(
     body = {
         "description": "test-description",
         "user_token": "GrantTableAccessWithoutLocalName",
+        "token_name": "test_grant_table_access_without_local_table_name",
     }
 
     requests.put("http://api:54541/GenerateUserToken", headers=headers, params=body)

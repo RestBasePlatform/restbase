@@ -13,6 +13,7 @@ from fields import LOCAL_DATABASE_NAME_FIELD_NAME
 from fields import LOCAL_TABLE_NAME_FILED_NAME
 from fields import TABLE_NAME_FIELD_NAME
 from fields import USER_TOKEN_FIELD_NAME
+from fields import USER_TOKEN_NAME_FIELD_NAME
 
 
 class RequestValidator:
@@ -53,11 +54,17 @@ class RequestValidator:
 
     def validate_generate_user_token(self, request: flask.request):
         return (
-            not set(request.args.keys())
-            or set(request.args.keys()) == {USER_TOKEN_FIELD_NAME}
-            or set(request.args.keys()) == {DESCRIPTION_FIELD_NAME}
+            set(request.args.keys()) == {USER_TOKEN_NAME_FIELD_NAME}
             or set(request.args.keys())
-            == {DESCRIPTION_FIELD_NAME, USER_TOKEN_FIELD_NAME}
+            == {USER_TOKEN_FIELD_NAME, USER_TOKEN_NAME_FIELD_NAME}
+            or set(request.args.keys())
+            == {DESCRIPTION_FIELD_NAME, USER_TOKEN_NAME_FIELD_NAME}
+            or set(request.args.keys())
+            == {
+                DESCRIPTION_FIELD_NAME,
+                USER_TOKEN_FIELD_NAME,
+                USER_TOKEN_NAME_FIELD_NAME,
+            }
         ) and self.is_header_valid(request.headers)
 
     def validate_grant_table_access(self, request: flask.request):

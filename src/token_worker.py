@@ -12,6 +12,7 @@ class TokenWorker:
 
     def add_token(
         self,
+        token_name: str,
         description: str = None,
         access_tables: typing.List[str] = [],
         token: str = None,
@@ -21,7 +22,9 @@ class TokenWorker:
             token = self.generate_token()
         if is_admin and self.local_base_worker.is_main_admin_token_exists:
             raise AdminTokenExistsError
-        self.local_base_worker.add_token(token, description, is_admin=is_admin)
+        self.local_base_worker.add_token(
+            token_name, token, description, is_admin=is_admin
+        )
 
         for table in access_tables:
             self.local_base_worker.add_table_for_token(
@@ -39,7 +42,7 @@ class TokenWorker:
         )
 
     def add_admin_token(self) -> str:
-        return self.add_token("main admin token", is_admin=True)
+        return self.add_token("admin", "main admin token", is_admin=True)
 
     def is_token_admin(self, token) -> bool:
         return token in [
