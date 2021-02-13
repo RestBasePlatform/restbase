@@ -339,3 +339,60 @@ def test_rename_table_errors(internal_db_session, postgre_db_data):
 
     # Check that response is correct
     assert response.text == "Table not found"
+
+
+def test_list_tables_request_admin_token(internal_db_session, postgre_db_data):
+    # Database added in test_add_database with test_table_1 and renamed to new_test_table_2 in
+    # test_rename_table_by_full_table_path
+    headers = {"content-type": "application/json", "admin_token": "admin-test-token"}
+
+    response = requests.get("http://api:54541/Table/list", headers=headers)
+    response_body = json.loads(response.text)
+    assert response.status_code == 200
+
+    assert "new_test_table_2" in response_body["List"]
+
+
+def test_list_tables_request_user_token(internal_db_session, postgre_db_data):
+    # Database added in test_add_database with test_table_1 and renamed to new_test_table_2 in
+    # test_rename_table_by_full_table_path
+    headers = {"content-type": "application/json", "admin_token": "admin-test-token"}
+
+    response = requests.get("http://api:54541/Table/list", headers=headers)
+    assert response.status_code == 200
+
+    body_grant_access = {
+        "user_token": "test_list_tables_request_user_token",
+        "local_table_name": "new_test_table_2",
+    }
+
+    body_generate_token = {
+        "description": "test-description",
+        "token_name": "test_list_tables_request_user_token",
+        "user_token": "test_list_tables_request_user_token",
+    }
+
+    resp = requests.put(
+        "http://api:54541/GenerateUserToken",
+        headers=headers,
+        params=body_generate_token,
+    )
+    assert resp.status_code == 201
+
+    resp = requests.post(
+        "http://api:54541/GrantTableAccess",
+        headers=headers,
+        params=body_grant_access,
+    )
+    assert resp.status_code == 200
+
+    user_headers = {
+        "content-type": "application/json",
+        "user_token": "test_list_tables_request_user_token",
+    }
+
+    response = requests.get("http://api:54541/Table/list", headers=user_headers)
+    response_body = json.loads(response.text)
+    assert response.status_code == 200
+
+    assert "new_test_table_2" in response_body["List"]

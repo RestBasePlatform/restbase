@@ -187,7 +187,11 @@ class LocalBaseWorker:
         ]
 
     def get_tokens_list(self) -> List[str]:
-        return [i.token for i in self.get_user_tokens_objects_list()]
+        return [
+            i.token
+            for i in self.get_user_tokens_objects_list()
+            + self.get_admin_tokens_objects_list()
+        ]
 
     def get_tokens_names_list(self) -> List[str]:
         return [i.name for i in self.get_user_tokens_objects_list()]
@@ -385,8 +389,11 @@ class LocalBaseWorker:
             self.db_session.add(new_table_obj)
             self.db_session.commit()
 
-            # Replace in user tokens after rename
-            for token in self.get_user_tokens_objects_list():
+            # Replace name in granter_tables fields in user and admin tokens after rename
+            for token in (
+                self.get_user_tokens_objects_list()
+                + self.get_admin_tokens_objects_list()
+            ):
                 if old_local_name in token.granted_tables:
                     token.granted_tables = [
                         new_local_name if i == old_local_name else i
