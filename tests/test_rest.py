@@ -190,3 +190,63 @@ def test_list_databases(internal_db_session, postgre_db_data):
     assert response.status_code == 200
 
     assert set(response_body["List"]) == {postgre_db_data["local_database_name"]}
+
+
+def test_rename_table_by_local_table_name(internal_db_session, postgre_db_data):
+    # Database added in test_add_database with test_table_1
+    headers = {"content-type": "application/json", "admin_token": "admin-test-token"}
+    body = {
+        "table": {
+            "local_table_name": "_".join(
+                [postgre_db_data.get("local_database_name"), "public", "test_table_1"]
+            )
+        },
+        "new_local_table_name": "new_test_table_1",
+    }
+    response = requests.post("http://api:54541/Table", headers=headers, json=body)
+    print(response.text)
+    response_body = json.loads(response.text)
+    assert response.status_code == 200
+
+    # Check that response is correct
+    assert response_body["new_table_name"] == "new_test_table_1"
+
+
+def test_rename_table_by_full_table_path(internal_db_session, postgre_db_data):
+    # Database added in test_add_database with test_table_1
+    headers = {"content-type": "application/json", "admin_token": "admin-test-token"}
+    body = {
+        "table": {"database": "test-base", "folder": "public", "table": "test_table_1"},
+        "new_local_table_name": "new_test_table_2",
+    }
+    response = requests.post("http://api:54541/Table", headers=headers, json=body)
+    print(response.text)
+    response_body = json.loads(response.text)
+    assert response.status_code == 200
+
+    # Check that response is correct
+    assert response_body["new_table_name"] == "new_test_table_2"
+
+
+def test_rename_table_errors(internal_db_session, postgre_db_data):
+    # Database added in test_add_database with test_table_1
+    headers = {"content-type": "application/json", "admin_token": "admin-test-token"}
+    body = {
+        "table": {"local_table_name": "some_table_random"},
+        "new_local_table_name": "new_test_table_2",
+    }
+    response = requests.post("http://api:54541/Table", headers=headers, json=body)
+    assert response.status_code == 404
+
+    # Check that response is correct
+    assert response.text == "Table not found"
+
+    body = {
+        "table": {"database": "test-base", "folder": "public", "table": "test_table_2"},
+        "new_local_table_name": "new_test_table_2",
+    }
+    response = requests.post("http://api:54541/Table", headers=headers, json=body)
+    assert response.status_code == 404
+
+    # Check that response is correct
+    assert response.text == "Table not found"
