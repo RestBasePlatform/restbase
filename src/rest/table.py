@@ -9,6 +9,7 @@ from fields import LOCAL_TABLE_NAME_FILED_NAME
 from fields import NEW_LOCAL_TABLE_NAME_FILED_NAME
 from fields import TABLE_NAME_FIELD_NAME
 from fields import USER_TOKEN_FIELD_NAME
+from fields import ADMIN_TOKEN_FIELD_NAME
 
 
 class Table(Resource):
@@ -95,7 +96,10 @@ class ListTable(Resource):
         if not self.rest_helper.request_validator.validate_list_tables_request(request):
             return make_response(*self.rest_helper.get_bad_request_answer())
 
-        token = request.headers.get(USER_TOKEN_FIELD_NAME)
+        if USER_TOKEN_FIELD_NAME in request.args:
+            token = request.args.get(USER_TOKEN_FIELD_NAME)
+        else:
+            token = request.args.get(ADMIN_TOKEN_FIELD_NAME)
 
         if token not in self.rest_helper.local_worker.get_tokens_list():
             return make_response("Token not found.", 201)
