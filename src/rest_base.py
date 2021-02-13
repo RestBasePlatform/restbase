@@ -71,7 +71,7 @@ app_new.add_resource(
 app_new.add_resource(
     Table,
     "/Table",
-    methods=["GET"],
+    methods=["GET", "POST"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )
 
@@ -112,8 +112,8 @@ def get_data_request():
         return flask.make_response(*get_bad_request_answer())
 
     # Check if token has access to table
-    token = flask.request.args.get(USER_TOKEN_FIELD_NAME)
-    print(token)
+    token = flask.request.headers.get(USER_TOKEN_FIELD_NAME)
+
     local_table_name = get_local_table_name_from_request(
         flask.request.args, local_base_worker
     )

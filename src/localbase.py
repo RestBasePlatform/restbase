@@ -222,7 +222,7 @@ class LocalBaseWorker:
         folder_name: str,
         table_name: str,
     ):
-        return (
+        table_object = (
             self.db_session.query(TablesInfoTable)
             .filter_by(
                 database_name=database_name,
@@ -230,8 +230,8 @@ class LocalBaseWorker:
                 table_name=table_name,
             )
             .first()
-            .local_name
         )
+        return table_object.local_name if table_object else None
 
     def get_token_tables(self, token: str) -> list:
         return (
@@ -355,3 +355,42 @@ class LocalBaseWorker:
             con=internal_db_engine,
             schema="public",
         )
+
+    def change_local_name(
+        self, change_type: str, old_local_name: str, new_local_name: str
+    ):
+        """
+        :param change_type: table or database (what change local name of)
+        :param old_local_name: old table or db local name
+        :param new_local_name: new table or db local name
+        """
+        if change_type == "database":
+            db_obj = self.get_database_object(old_local_name)
+            db_obj.local_name = new_local_name
+        if change_type == "table":
+            table_obj = self.get_table(local_table_name=old_local_name)
+
+            # if just set new local name we get " duplicate key value violates unique constraint"
+            # that's why we need to replace entire object
+            new_table_obj = TablesInfoTable(
+                local_name=new_local_name,
+                database_name=table_obj.database_name,
+                folder_name=table_obj.folder_name,
+                table_name=table_obj.table_name,
+                columns=table_obj.columns,
+            )
+
+            self.db_session.delete(table_obj)
+            self.db_session.commit()
+            self.db_session.add(new_table_obj)
+            self.db_session.commit()
+
+            # Replace in user tokens after rename
+            for token in self.get_user_tokens_objects_list():
+                if old_local_name in token.granted_tables:
+                    token.granted_tables = [
+                        new_local_name if i == old_local_name else i
+                        for i in token.granted_tables
+                    ]
+
+        self.db_session.commit()

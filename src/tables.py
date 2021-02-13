@@ -40,5 +40,5 @@ class TablesInfoTable(Base):
     table_name = Column(String)
     folder_name = Column(String)
     database_name = Column(String, ForeignKey("bases.local_name"), primary_key=True)
-    local_name = Column(String)
+    local_name = Column(String, primary_key=True)
     columns = Column(postgresql.JSON)

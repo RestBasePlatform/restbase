@@ -51,7 +51,7 @@ class Database(Resource):
         if not self.rest_helper.request_validator.validate_add_database_request(
             request
         ):
-            return make_response(self.rest_helper.get_bad_request_answer())
+            return make_response(*self.rest_helper.get_bad_request_answer())
 
         token = request.headers.get(ADMIN_TOKEN_FIELD_NAME)
 
