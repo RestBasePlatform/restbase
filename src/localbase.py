@@ -222,7 +222,7 @@ class LocalBaseWorker:
         folder_name: str,
         table_name: str,
     ):
-        return (
+        table_object = (
             self.db_session.query(TablesInfoTable)
             .filter_by(
                 database_name=database_name,
@@ -230,8 +230,8 @@ class LocalBaseWorker:
                 table_name=table_name,
             )
             .first()
-            .local_name
         )
+        return table_object.local_name if table_object else None
 
     def get_token_tables(self, token: str) -> list:
         return (
