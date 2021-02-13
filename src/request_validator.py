@@ -101,7 +101,10 @@ class RequestValidator:
 
     @staticmethod
     def validate_list_tables_request(request: flask.request) -> bool:
-        return USER_TOKEN_FIELD_NAME in request.headers or ADMIN_TOKEN_FIELD_NAME in request.headers
+        return (
+            USER_TOKEN_FIELD_NAME in request.headers
+            or ADMIN_TOKEN_FIELD_NAME in request.headers
+        )
 
     @staticmethod
     def validate_get_table_data_request(request: flask.request):
