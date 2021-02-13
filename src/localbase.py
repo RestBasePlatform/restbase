@@ -360,10 +360,9 @@ class LocalBaseWorker:
         self, change_type: str, old_local_name: str, new_local_name: str
     ):
         """
-        :param change_type:
-        :param old_local_name:
-        :param new_local_name:
-        :return:
+        :param change_type: table or database (what change local name of)
+        :param old_local_name: old table or db local name
+        :param new_local_name: new table or db local name
         """
         if change_type == "database":
             db_obj = self.get_database_object(old_local_name)

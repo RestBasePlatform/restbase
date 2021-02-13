@@ -93,12 +93,12 @@ class ListTable(Resource):
 
     def get(self):
         if not self.rest_helper.request_validator.validate_list_tables_request(request):
-            return make_response(self.rest_helper.get_bad_request_answer())
+            return make_response(*self.rest_helper.get_bad_request_answer())
 
-        token = request.args.get(USER_TOKEN_FIELD_NAME)
+        token = request.headers.get(USER_TOKEN_FIELD_NAME)
 
-        if not token not in self.rest_helper.local_worker.get_tokens_list():
-            return make_response("Token not found.", 403)
+        if token not in self.rest_helper.local_worker.get_tokens_list():
+            return make_response("Token not found.", 201)
 
         return make_response(
             {
