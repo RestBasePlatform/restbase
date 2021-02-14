@@ -21,12 +21,15 @@ class Table(Resource):
         if not self.rest_helper.request_validator.validate_get_table_data_request(
             request
         ):
-            return make_response(self.rest_helper.get_bad_request_answer())
+            return make_response(*self.rest_helper.get_bad_request_answer())
 
-        token = request.args.get(USER_TOKEN_FIELD_NAME)
+        token = request.headers.get(USER_TOKEN_FIELD_NAME)
         table_name = request.args.get(LOCAL_TABLE_NAME_FILED_NAME)
         if token not in self.rest_helper.local_worker.get_tokens_list():
-            return make_response("Token not found.", 403)
+            return make_response("Token not found.", 404)
+
+        if table_name not in self.rest_helper.local_worker.get_local_name_list():
+            return make_response("Table not found.", 404)
 
         if table_name not in self.rest_helper.local_worker.get_token_tables(token):
             return make_response("Access for token denied", 403)

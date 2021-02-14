@@ -187,11 +187,7 @@ class LocalBaseWorker:
         ]
 
     def get_tokens_list(self) -> List[str]:
-        return [
-            i.token
-            for i in self.get_user_tokens_objects_list()
-            + self.get_admin_tokens_objects_list()
-        ]
+        return [i.token for i in get_existing_data(self.db_session, TokenTable)]
 
     def get_tokens_names_list(self) -> List[str]:
         return [i.name for i in self.get_user_tokens_objects_list()]
