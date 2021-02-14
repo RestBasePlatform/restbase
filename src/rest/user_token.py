@@ -27,7 +27,7 @@ class UserToken(Resource):
             request.args.get(USER_TOKEN_FIELD_NAME)
             in self.rest_helper.local_worker.get_tokens_list()
         ) or (
-            request.args.get(USER_TOKEN_FIELD_NAME)
+            request.args.get(USER_TOKEN_NAME_FIELD_NAME)
             in self.rest_helper.local_worker.get_tokens_names_list()
         ):
             return make_response(

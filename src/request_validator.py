@@ -109,7 +109,7 @@ class RequestValidator:
     @staticmethod
     def validate_get_table_data_request(request: flask.request):
         return (
-            USER_TOKEN_FIELD_NAME in request.args
+            USER_TOKEN_FIELD_NAME in request.headers
             and LOCAL_TABLE_NAME_FILED_NAME in request.args
         )
 
