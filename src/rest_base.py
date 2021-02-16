@@ -131,9 +131,20 @@ def get_data_request():
         local_base_worker.get_db_type(local_table_name=local_table_name)
     )(database_local_name, local_base_worker)
 
-    return_data = worker.execute_get_data_request(query)
+    try:
+        return_data = worker.execute_get_data_request(query)
+        return flask.make_response({"data": return_data}, 200)
 
-    return flask.make_response({"data": return_data}, 200)
+    except Exception as e:
+
+        return flask.make_response(
+            {
+                "status": "error",
+                "server error": str(e),
+                "message": "Make sure that request parametrs are correct. If all is correct pls report bug on github.",
+            },
+            500,
+        )
 
 
 if __name__ == "__main__":
