@@ -124,8 +124,12 @@ def get_data_request():
     database_local_name = local_base_worker.get_base_of_table(
         local_table_name=local_table_name
     )
-    query_builder = QueryBuilder(local_base_worker, flask.request.args)
-    query = query_builder.get_query()
+
+    if "query" not in flask.request.args:
+        query_builder = QueryBuilder(local_base_worker, flask.request.args)
+        query = query_builder.get_query()
+    else:
+        query = flask.request.args['query']
 
     worker = get_worker(
         local_base_worker.get_db_type(local_table_name=local_table_name)
@@ -141,7 +145,7 @@ def get_data_request():
             {
                 "status": "error",
                 "server error": str(e),
-                "message": "Make sure that request parametrs are correct. If all is correct pls report bug on github.",
+                "message": "Make sure that request parameters are correct. If all is correct pls report bug on github.",
             },
             500,
         )
