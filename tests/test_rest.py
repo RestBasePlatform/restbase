@@ -429,9 +429,10 @@ def test_get_data_no_access(internal_db_session, postgre_db_data):
     headers_user = {"content-type": "application/json", "user_token": "test_get_data_no_access"}
     body_get_data = {"local_database_name": "test-base", "query": "SELECT * FROM public.test_table_2"}
 
-    resp = requests.post(
+    resp = requests.get(
         "http://api:54541/GetData",
         headers=headers_user,
         params=body_get_data,
     )
+    print(resp)
     assert resp.status_code == 200
