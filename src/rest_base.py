@@ -37,12 +37,14 @@ app_new = Api(app)
 app_new.add_resource(
     AdminToken,
     "/GenerateAdminToken",
+    "/GenerateAdminToken/",
     resource_class_kwargs={"rest_helper": rest_helper},
 )
 
 app_new.add_resource(
     UserToken,
     "/GenerateUserToken",
+    "/GenerateUserToken/",
     methods=["PUT"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )
@@ -51,6 +53,7 @@ app_new.add_resource(
 app_new.add_resource(
     ListUserToken,
     "/ListUserTokens",
+    "/ListUserTokens/",
     methods=["GET"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )
@@ -58,6 +61,7 @@ app_new.add_resource(
 app_new.add_resource(
     Database,
     "/Database",
+    "/Database/",
     methods=["PUT", "GET", "POST"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )
@@ -66,6 +70,7 @@ app_new.add_resource(
 app_new.add_resource(
     ListDatabase,
     "/Database/list",
+    "/Database/list/",
     methods=["GET"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )
@@ -73,6 +78,7 @@ app_new.add_resource(
 app_new.add_resource(
     Table,
     "/Table",
+    "/Table/",
     methods=["GET", "POST"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )
@@ -80,6 +86,7 @@ app_new.add_resource(
 app_new.add_resource(
     ListTable,
     "/Table/list",
+    "/Table/list/",
     methods=["GET"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )

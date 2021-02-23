@@ -99,10 +99,10 @@ class ListTable(Resource):
         if not self.rest_helper.request_validator.validate_list_tables_request(request):
             return make_response(*self.rest_helper.get_bad_request_answer())
 
-        if USER_TOKEN_FIELD_NAME in request.headers:
-            token = request.headers.get(USER_TOKEN_FIELD_NAME)
-        else:
+        if ADMIN_TOKEN_FIELD_NAME in request.headers:
             token = request.headers.get(ADMIN_TOKEN_FIELD_NAME)
+        else:
+            token = request.headers.get(USER_TOKEN_FIELD_NAME)
 
         if token not in self.rest_helper.local_worker.get_tokens_list():
             return make_response("Token not found.", 404)
