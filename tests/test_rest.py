@@ -396,3 +396,42 @@ def test_list_tables_request_user_token(internal_db_session, postgre_db_data):
     assert response.status_code == 200
 
     assert "new_test_table_2" in response_body["List"]
+
+
+def test_get_data_no_access(internal_db_session, postgre_db_data):
+    headers_admin = {"content-type": "application/json", "admin_token": "admin-test-token"}
+
+    body_generate_token = {
+        "description": "test-description",
+        "token_name": "test_get_data_no_access",
+        "user_token": "test_get_data_no_access",
+    }
+
+    resp = requests.put(
+        "http://api:54541/GenerateUserToken",
+        headers=headers_admin,
+        params=body_generate_token,
+    )
+    assert resp.status_code == 201
+
+    body_grant_access = {
+        "user_token": "test_get_data_no_access",
+        "local_table_name": "new_test_table_2",
+    }
+
+    resp = requests.post(
+        "http://api:54541/GrantTableAccess",
+        headers=headers_admin,
+        params=body_grant_access,
+    )
+    assert resp.status_code == 200
+
+    headers_user = {"content-type": "application/json", "user_token": "test_get_data_no_access"}
+    body_get_data = {"local_database_name": "test-base", "query": "SELECT * FROM public.test_table_2"}
+
+    resp = requests.post(
+        "http://api:54541/GetData",
+        headers=headers_user,
+        params=body_get_data,
+    )
+    assert resp.status_code == 200
