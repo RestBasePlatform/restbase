@@ -6,9 +6,9 @@ from flask_restful import Api
 from exceptions import AccessAlreadyGrantedError
 from exceptions import TableNotFoundError
 from fields import ADMIN_TOKEN_FIELD_NAME
-from fields import USER_TOKEN_FIELD_NAME
-from fields import QUERY_FIELD_NAME
 from fields import LOCAL_DATABASE_NAME_FIELD_NAME
+from fields import QUERY_FIELD_NAME
+from fields import USER_TOKEN_FIELD_NAME
 from localbase import LocalBaseWorker
 from request_validator import RequestValidator
 from rest import AdminToken
@@ -19,11 +19,11 @@ from rest import ListUserToken
 from rest import Table
 from rest import UserToken
 from rest.common_rest import RestCommon
+from sql_query_worker import SqlQueryWorker
 from token_worker import TokenWorker
 from utils import get_bad_request_answer
 from utils import get_local_table_name_from_request
 from utils import get_worker
-from sql_query_worker import SqlQueryWorker
 
 app = flask.Flask("RestBase")
 
@@ -115,6 +115,9 @@ def get_data_request():
 
     # Check if token has access to table
     token = flask.request.headers.get(USER_TOKEN_FIELD_NAME)
+
+    if token not in local_base_worker.get_tokens_list():
+        return flask.make_response("Token not found.", 404)
 
     query = flask.request.args.get(QUERY_FIELD_NAME)
     local_database_name = flask.request.args.get(LOCAL_DATABASE_NAME_FIELD_NAME)

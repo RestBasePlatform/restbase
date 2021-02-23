@@ -101,7 +101,9 @@ class Database(Resource):
             tables = worker.download_table_list()
 
             # After rescan add grant access for admin tokens
-            for token_obj in self.rest_helper.local_worker.get_admin_tokens_objects_list():
+            for (
+                token_obj
+            ) in self.rest_helper.local_worker.get_admin_tokens_objects_list():
 
                 token = token_obj.token
 
@@ -121,7 +123,7 @@ class ListDatabase(Resource):
         if not self.rest_helper.request_validator.validate_list_databases_request(
             request
         ):
-            return make_response(self.rest_helperget_bad_request_answer())
+            return make_response(self.rest_helpe.rget_bad_request_answer())
 
         token = request.headers.get(ADMIN_TOKEN_FIELD_NAME)
 

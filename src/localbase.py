@@ -295,7 +295,9 @@ class LocalBaseWorker:
             )
         )
 
-    def get_db_type(self, local_table_name: str = None, local_db_name: str = None) -> str:
+    def get_db_type(
+        self, local_table_name: str = None, local_db_name: str = None
+    ) -> str:
         if local_table_name:
             local_db_name = (
                 self.db_session.query(TablesInfoTable)
@@ -304,7 +306,10 @@ class LocalBaseWorker:
                 .database_name
             )
         return (
-            self.db_session.query(BasesTable).filter_by(local_name=local_db_name).first().type
+            self.db_session.query(BasesTable)
+            .filter_by(local_name=local_db_name)
+            .first()
+            .type
         )
 
     @property

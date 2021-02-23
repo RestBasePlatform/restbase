@@ -33,7 +33,8 @@ class TokenWorker:
         return token
 
     def validate_access(self, token: str, local_table_name: str) -> bool:
-        return local_table_name in self.local_base_worker.get_token_tables(token)
+        token_tables = self.local_base_worker.get_token_tables(token)
+        return local_table_name in token_tables if token_tables else False
 
     @staticmethod
     def generate_token() -> str:
