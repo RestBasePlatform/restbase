@@ -82,6 +82,37 @@ class Database(Resource):
         except (DatabaseAlreadyExistsError, ConnectionError) as e:
             return make_response({"status": "failed", "error": str(e)}, 500)
 
+    def post(self):
+        if not self.rest_helper.request_validator.is_admin_header_valid(
+            request.headers
+        ):
+            return make_response(*self.rest_helper.get_bad_request_answer())
+
+        token = request.headers.get(ADMIN_TOKEN_FIELD_NAME)
+
+        if not self.rest_helper.token_worker.is_token_admin(token):
+            return make_response("Access denied", 403)
+
+        # Rescan database structures
+        for local_base_name in self.rest_helper.local_worker.get_db_name_list():
+            worker = get_worker(request.args.get(DATABASE_TYPE_FIELD_NAME))(
+                local_base_name, self.rest_helper.local_worker
+            )
+            tables = worker.download_table_list()
+
+            # After rescan add grant access for admin tokens
+            for (
+                token_obj
+            ) in self.rest_helper.local_worker.get_admin_tokens_objects_list():
+
+                token = token_obj.token
+
+                for local_table_name in tables:
+                    if local_base_name not in token_obj.granted_tables:
+                        self.rest_helper.local_worker.add_table_for_token(
+                            token, local_table_name=local_table_name
+                        )
+
 
 class ListDatabase(Resource):
     def __init__(self, rest_helper: RestCommon):
@@ -92,7 +123,7 @@ class ListDatabase(Resource):
         if not self.rest_helper.request_validator.validate_list_databases_request(
             request
         ):
-            return make_response(self.rest_helperget_bad_request_answer())
+            return make_response(self.rest_helpe.rget_bad_request_answer())
 
         token = request.headers.get(ADMIN_TOKEN_FIELD_NAME)
 

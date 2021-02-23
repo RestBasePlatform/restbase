@@ -113,10 +113,11 @@ class RequestValidator:
             and LOCAL_TABLE_NAME_FILED_NAME in request.args
         )
 
-    def validate_get_data_request(self, request: flask.request):
+    @staticmethod
+    def validate_get_data_request(request: flask.request):
         return (
-            USER_TOKEN_FIELD_NAME in request.args
-            and self.is_defined_local_table_name_or_full_path(request.args)
+            USER_TOKEN_FIELD_NAME in request.headers
+            and LOCAL_DATABASE_NAME_FIELD_NAME in request.args
         )
 
     def validate_set_local_table_name_request(self, request: flask.request):
