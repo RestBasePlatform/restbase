@@ -199,6 +199,7 @@ class LocalBaseWorker:
         folder_name: str = None,
         table_name: str = None,
         local_table_name: str = None,
+        token_name: str = None,
     ):
         if not local_table_name:
             local_table_name = self.get_local_table_name(
@@ -206,7 +207,11 @@ class LocalBaseWorker:
                 folder_name=folder_name,
                 table_name=table_name,
             )
-        row = self.db_session.query(TokenTable).filter_by(token=token).first()
+
+        if token:
+            row = self.db_session.query(TokenTable).filter_by(token=token).first()
+        elif token_name:
+            row = self.db_session.query(TokenTable).filter_by(name=token_name).first()
 
         if not self.is_table_exists(local_table_name=local_table_name):
             raise TableNotFoundError(local_table_name)

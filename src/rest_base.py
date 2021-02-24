@@ -9,6 +9,7 @@ from fields import ADMIN_TOKEN_FIELD_NAME
 from fields import LOCAL_DATABASE_NAME_FIELD_NAME
 from fields import QUERY_FIELD_NAME
 from fields import USER_TOKEN_FIELD_NAME
+from fields import USER_TOKEN_NAME_FIELD_NAME
 from localbase import LocalBaseWorker
 from request_validator import RequestValidator
 from rest import AdminToken
@@ -105,6 +106,7 @@ def grant_table_access():
     try:
         local_base_worker.add_table_for_token(
             token=flask.request.args.get(USER_TOKEN_FIELD_NAME),
+            token_name=flask.request.args.get(USER_TOKEN_NAME_FIELD_NAME),
             local_table_name=get_local_table_name_from_request(
                 flask.request.args, local_base_worker
             ),

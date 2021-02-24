@@ -76,7 +76,10 @@ class RequestValidator:
         return (
             self.is_defined_local_table_name_or_full_path(request.args)
             and self.is_admin_header_valid(request.headers)
-            and USER_TOKEN_FIELD_NAME in request.args
+            and (
+                USER_TOKEN_FIELD_NAME in request.args
+                or USER_TOKEN_NAME_FIELD_NAME in request.args
+            )
         )
 
     def validate_add_database_request(self, request: flask.request):
