@@ -73,9 +73,14 @@ class RequestValidator:
         ) and self.is_admin_header_valid(request.headers)
 
     def validate_grant_table_access(self, request: flask.request):
-        return self.is_defined_local_table_name_or_full_path(
-            request.args
-        ) and self.is_admin_header_valid(request.headers)
+        return (
+            self.is_defined_local_table_name_or_full_path(request.args)
+            and self.is_admin_header_valid(request.headers)
+            and (
+                USER_TOKEN_FIELD_NAME in request.args
+                or USER_TOKEN_NAME_FIELD_NAME in request.args
+            )
+        )
 
     def validate_add_database_request(self, request: flask.request):
         is_local_database_name_defined = LOCAL_DATABASE_NAME_FIELD_NAME in request.args
@@ -113,10 +118,11 @@ class RequestValidator:
             and LOCAL_TABLE_NAME_FILED_NAME in request.args
         )
 
-    def validate_get_data_request(self, request: flask.request):
+    @staticmethod
+    def validate_get_data_request(request: flask.request):
         return (
-            USER_TOKEN_FIELD_NAME in request.args
-            and self.is_defined_local_table_name_or_full_path(request.args)
+            USER_TOKEN_FIELD_NAME in request.headers
+            and LOCAL_DATABASE_NAME_FIELD_NAME in request.args
         )
 
     def validate_set_local_table_name_request(self, request: flask.request):

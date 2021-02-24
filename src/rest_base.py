@@ -6,9 +6,11 @@ from flask_restful import Api
 from exceptions import AccessAlreadyGrantedError
 from exceptions import TableNotFoundError
 from fields import ADMIN_TOKEN_FIELD_NAME
+from fields import LOCAL_DATABASE_NAME_FIELD_NAME
+from fields import QUERY_FIELD_NAME
 from fields import USER_TOKEN_FIELD_NAME
+from fields import USER_TOKEN_NAME_FIELD_NAME
 from localbase import LocalBaseWorker
-from query_builders import QueryBuilder
 from request_validator import RequestValidator
 from rest import AdminToken
 from rest import Database
@@ -18,6 +20,7 @@ from rest import ListUserToken
 from rest import Table
 from rest import UserToken
 from rest.common_rest import RestCommon
+from sql_query_worker import SqlQueryWorker
 from token_worker import TokenWorker
 from utils import get_bad_request_answer
 from utils import get_local_table_name_from_request
@@ -35,12 +38,14 @@ app_new = Api(app)
 app_new.add_resource(
     AdminToken,
     "/GenerateAdminToken",
+    "/GenerateAdminToken/",
     resource_class_kwargs={"rest_helper": rest_helper},
 )
 
 app_new.add_resource(
     UserToken,
     "/GenerateUserToken",
+    "/GenerateUserToken/",
     methods=["PUT"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )
@@ -49,6 +54,7 @@ app_new.add_resource(
 app_new.add_resource(
     ListUserToken,
     "/ListUserTokens",
+    "/ListUserTokens/",
     methods=["GET"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )
@@ -56,7 +62,8 @@ app_new.add_resource(
 app_new.add_resource(
     Database,
     "/Database",
-    methods=["PUT", "GET"],
+    "/Database/",
+    methods=["PUT", "GET", "POST"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )
 
@@ -64,6 +71,7 @@ app_new.add_resource(
 app_new.add_resource(
     ListDatabase,
     "/Database/list",
+    "/Database/list/",
     methods=["GET"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )
@@ -71,6 +79,7 @@ app_new.add_resource(
 app_new.add_resource(
     Table,
     "/Table",
+    "/Table/",
     methods=["GET", "POST"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )
@@ -78,6 +87,7 @@ app_new.add_resource(
 app_new.add_resource(
     ListTable,
     "/Table/list",
+    "/Table/list/",
     methods=["GET"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )
@@ -96,6 +106,7 @@ def grant_table_access():
     try:
         local_base_worker.add_table_for_token(
             token=flask.request.args.get(USER_TOKEN_FIELD_NAME),
+            token_name=flask.request.args.get(USER_TOKEN_NAME_FIELD_NAME),
             local_table_name=get_local_table_name_from_request(
                 flask.request.args, local_base_worker
             ),
@@ -114,26 +125,39 @@ def get_data_request():
     # Check if token has access to table
     token = flask.request.headers.get(USER_TOKEN_FIELD_NAME)
 
-    local_table_name = get_local_table_name_from_request(
-        flask.request.args, local_base_worker
-    )
+    if token not in local_base_worker.get_tokens_list():
+        return flask.make_response("Token not found.", 404)
 
-    if not token_worker.validate_access(token, local_table_name):
-        return flask.make_response("Access denied", 403)
+    query = flask.request.args.get(QUERY_FIELD_NAME)
+    local_database_name = flask.request.args.get(LOCAL_DATABASE_NAME_FIELD_NAME)
 
-    database_local_name = local_base_worker.get_base_of_table(
-        local_table_name=local_table_name
-    )
-    query_builder = QueryBuilder(local_base_worker, flask.request.args)
-    query = query_builder.get_query()
+    if local_database_name not in local_base_worker.get_db_name_list():
+        return flask.make_response(f"Database {local_database_name} not found.", 404)
 
     worker = get_worker(
-        local_base_worker.get_db_type(local_table_name=local_table_name)
-    )(database_local_name, local_base_worker)
+        local_base_worker.get_db_type(local_db_name=local_database_name)
+    )(local_database_name, local_base_worker)
 
-    return_data = worker.execute_get_data_request(query)
+    sql_worker = SqlQueryWorker(query, local_base_worker, local_database_name)
 
-    return flask.make_response({"data": return_data}, 200)
+    for table in sql_worker.get_local_table_names():
+        if not token_worker.validate_access(token, table):
+            return flask.make_response(f"Access denied for table {table}", 403)
+
+    try:
+        return_data = worker.execute_get_data_request(query)
+        return flask.make_response({"data": return_data}, 200)
+
+    except Exception as e:
+
+        return flask.make_response(
+            {
+                "status": "error",
+                "server error": str(e),
+                "message": "Make sure that request parameters are correct. If all is correct pls report bug on github.",
+            },
+            500,
+        )
 
 
 if __name__ == "__main__":

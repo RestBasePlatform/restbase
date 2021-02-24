@@ -396,3 +396,141 @@ def test_list_tables_request_user_token(internal_db_session, postgre_db_data):
     assert response.status_code == 200
 
     assert "new_test_table_2" in response_body["List"]
+
+
+def test_get_data_no_table(internal_db_session, postgre_db_data):
+    headers_admin = {
+        "content-type": "application/json",
+        "admin_token": "admin-test-token",
+    }
+
+    body_generate_token = {
+        "description": "test-description",
+        "token_name": "test_get_data_no_table",
+        "user_token": "test_get_data_no_table",
+    }
+
+    resp = requests.put(
+        "http://api:54541/GenerateUserToken",
+        headers=headers_admin,
+        params=body_generate_token,
+    )
+    assert resp.status_code == 201
+
+    body_grant_access = {
+        "user_token": "test_get_data_no_table",
+        "local_table_name": "new_test_table_2",
+    }
+
+    resp = requests.post(
+        "http://api:54541/GrantTableAccess",
+        headers=headers_admin,
+        params=body_grant_access,
+    )
+    assert resp.status_code == 200
+
+    headers_user = {
+        "content-type": "application/json",
+        "user_token": "test_get_data_no_table",
+    }
+    # Table test_table_2 doesn't exists - so we got permission denied
+    body_get_data = {
+        "local_database_name": "test-base",
+        "query": "SELECT * FROM public.test_table_2",
+    }
+
+    resp = requests.get(
+        "http://api:54541/GetData",
+        headers=headers_user,
+        params=body_get_data,
+    )
+
+    assert resp.status_code == 403
+
+
+def test_get_data_no_access(internal_db_session, postgre_db_data):
+    headers_admin = {
+        "content-type": "application/json",
+        "admin_token": "admin-test-token",
+    }
+
+    body_generate_token = {
+        "description": "test-description",
+        "token_name": "test_get_data_no_access",
+        "user_token": "test_get_data_no_access",
+    }
+
+    resp = requests.put(
+        "http://api:54541/GenerateUserToken",
+        headers=headers_admin,
+        params=body_generate_token,
+    )
+    assert resp.status_code == 201
+
+    headers_user = {
+        "content-type": "application/json",
+        "user_token": "test_get_data_no_access",
+    }
+    # Table test_table_1 exists but we don't grant access for this
+    body_get_data = {
+        "local_database_name": "test-base",
+        "query": "SELECT * FROM public.test_table_1",
+    }
+
+    resp = requests.get(
+        "http://api:54541/GetData",
+        headers=headers_user,
+        params=body_get_data,
+    )
+    print(resp.text)
+    assert resp.status_code == 403
+
+
+def test_get_data_success(internal_db_session, postgre_db_data):
+    headers_admin = {
+        "content-type": "application/json",
+        "admin_token": "admin-test-token",
+    }
+
+    body_generate_token = {
+        "description": "test-description",
+        "token_name": "test_get_data_success",
+        "user_token": "test_get_data_success",
+    }
+
+    resp = requests.put(
+        "http://api:54541/GenerateUserToken",
+        headers=headers_admin,
+        params=body_generate_token,
+    )
+    assert resp.status_code == 201
+
+    body_grant_access = {
+        "user_token": "test_get_data_success",
+        "local_table_name": "new_test_table_2",
+    }
+
+    resp = requests.post(
+        "http://api:54541/GrantTableAccess",
+        headers=headers_admin,
+        params=body_grant_access,
+    )
+    assert resp.status_code == 200
+
+    headers_user = {
+        "content-type": "application/json",
+        "user_token": "test_get_data_success",
+    }
+    # Table test_table_1 exists but we don't grant access for this
+    body_get_data = {
+        "local_database_name": "test-base",
+        "query": "SELECT * FROM public.test_table_1",
+    }
+
+    resp = requests.get(
+        "http://api:54541/GetData",
+        headers=headers_user,
+        params=body_get_data,
+    )
+
+    assert resp.status_code == 200
