@@ -129,6 +129,9 @@ def get_data_request():
     query = flask.request.args.get(QUERY_FIELD_NAME)
     local_database_name = flask.request.args.get(LOCAL_DATABASE_NAME_FIELD_NAME)
 
+    if local_database_name not in local_base_worker.get_db_name_list():
+        return flask.make_response(f"Database {local_database_name} not found.", 404)
+
     worker = get_worker(
         local_base_worker.get_db_type(local_db_name=local_database_name)
     )(local_database_name, local_base_worker)
