@@ -48,7 +48,9 @@ class ListUserToken(Resource):
         self.rest_helper = rest_helper
 
     def get(self):
-        if not self.rest_helper.request_validator.validate_generate_user_token(request):
+        if not self.rest_helper.request_validator.is_admin_header_valid(
+            request.headers
+        ):
             return make_response(*self.rest_helper.get_bad_request_answer())
 
         token = request.headers.get(ADMIN_TOKEN_FIELD_NAME)

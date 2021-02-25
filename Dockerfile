@@ -65,5 +65,4 @@ COPY conf/pg_hba.conf /etc/postgresql/9.3/main/pg_hba.conf
 #USER root
 EXPOSE 54541
 EXPOSE 5432
-
-CMD ["bash" , "./startup.sh"]
+ENTRYPOINT ["sh", "./startup.sh"]
