@@ -1,6 +1,7 @@
 import os
 
 import flask
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask_restful import Api
 
 from exceptions import AccessAlreadyGrantedError
@@ -25,10 +26,18 @@ from token_worker import TokenWorker
 from utils import get_bad_request_answer
 from utils import get_local_table_name_from_request
 from utils import get_worker
+from utils import update_data_about_db_structure
 
 app = flask.Flask("RestBase")
 
 local_base_worker = LocalBaseWorker()
+
+# Schedule database structure update
+scheduler = BackgroundScheduler(daemon=True)
+scheduler.add_job(
+    update_data_about_db_structure, "interval", minutes=30, args=[local_base_worker]
+)
+scheduler.start()
 
 token_worker = TokenWorker(local_base_worker)
 request_validator = RequestValidator()

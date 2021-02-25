@@ -79,3 +79,25 @@ def get_db_engine(db_type: str, **con_params):
 
 def get_bad_request_answer() -> list:
     return [{"status": "error", "message": "Incorrect request"}, 400]
+
+
+def update_data_about_db_structure(local_worker):
+    """
+    This function iterates through all databases and refreshes its structure data (about tables/schemas)
+    :param local_worker: object of LocalBaseWorker
+    """
+    for local_base_name in local_worker.get_db_name_list():
+        db_type = local_worker.get_database_object(local_base_name).type
+        worker = get_worker(db_type)(local_base_name, local_worker)
+        tables = worker.download_table_list()
+
+        # After rescan add grant access for admin tokens
+        for token_obj in local_worker.get_admin_tokens_objects_list():
+
+            token = token_obj.token
+
+            for local_table_name in tables:
+                if local_table_name not in list(token_obj.granted_tables):
+                    local_worker.add_table_for_token(
+                        token, local_table_name=local_table_name
+                    )
