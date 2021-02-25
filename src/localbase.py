@@ -58,6 +58,10 @@ class LocalBaseWorker:
 
         return local_name
 
+    def remove_database(self, local_name):
+        self.db_session.query(BasesTable).filter_by(local_name=local_name).delete()
+        self.db_session.commit()
+
     def get_database_and_connection(self, local_base_name: str):
         database_obj = (
             self.db_session.query(BasesTable)

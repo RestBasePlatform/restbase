@@ -14,6 +14,7 @@ from fields import DATABASE_USER_FIELD_NAME
 from fields import DESCRIPTION_FIELD_NAME
 from fields import LOCAL_DATABASE_NAME_FIELD_NAME
 from utils import get_worker
+from utils import update_data_about_db_structure
 
 
 class Database(Resource):
@@ -53,6 +54,9 @@ class Database(Resource):
         ):
             return make_response(*self.rest_helper.get_bad_request_answer())
 
+        # to prevent variable not found in except block
+        local_name = None
+
         token = request.headers.get(ADMIN_TOKEN_FIELD_NAME)
 
         if not self.rest_helper.token_worker.is_token_admin(token):
@@ -80,6 +84,9 @@ class Database(Resource):
                 )
             return make_response({"status": "success", "local_name": local_name}, 200)
         except (DatabaseAlreadyExistsError, ConnectionError) as e:
+            if local_name:
+                self.rest_helper.local_worker.remove_database(local_name)
+
             return make_response({"status": "failed", "error": str(e)}, 500)
 
     def post(self):
@@ -94,24 +101,7 @@ class Database(Resource):
             return make_response("Access denied", 403)
 
         # Rescan database structures
-        for local_base_name in self.rest_helper.local_worker.get_db_name_list():
-            worker = get_worker(request.args.get(DATABASE_TYPE_FIELD_NAME))(
-                local_base_name, self.rest_helper.local_worker
-            )
-            tables = worker.download_table_list()
-
-            # After rescan add grant access for admin tokens
-            for (
-                token_obj
-            ) in self.rest_helper.local_worker.get_admin_tokens_objects_list():
-
-                token = token_obj.token
-
-                for local_table_name in tables:
-                    if local_base_name not in token_obj.granted_tables:
-                        self.rest_helper.local_worker.add_table_for_token(
-                            token, local_table_name=local_table_name
-                        )
+        update_data_about_db_structure(self.rest_helper.local_worker)
 
 
 class ListDatabase(Resource):
