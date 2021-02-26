@@ -1,0 +1,55 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    networks:
+      restbase_test_network:
+        ipv4_address: "10.5.0.5"
+
+  postgres_test_base:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    networks:
+      restbase_test_network:
+        ipv4_address: "10.5.0.2"
+
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres_test_base
+      - postgres
+    environment:
+      STAGE: test
+    ports:
+      - "54541:54541"
+      - "5432:5432"
+    networks:
+      restbase_test_network:
+        ipv4_address: "10.5.0.3"
+
+  tests:
+    build:
+      context: ..
+      dockerfile: Dockerfile_tests
+    depends_on:
+      - postgres_test_base
+      - api
+      - postgres
+    networks:
+      restbase_test_network:
+        ipv4_address: "10.5.0.4"
+
+networks:
+  restbase_test_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1

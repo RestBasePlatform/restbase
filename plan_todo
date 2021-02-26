@@ -1,0 +1,77 @@
+Program for rest access to database.
+
+All module will work through 1 database account
+
+Include modules:
+
+1) SqlRequest worker
+    Class that will build sql queries by rest api
+2) TokenWorker
+    Class to generate/validate access tokens
+3) DatabaseWorker
+    Class to read db structure (schemas -> tables -> columns -> types(if type == datetime -> time format)):
+    All sctructure will store in local sqlite database (if docker with rest module turn off - we can reread structure and dont do new requests to database )
+    All logs will be stored in that database too.
+    For each db type will be own worker (class)
+4) RestRequest worker
+    Class to build answer request and process incoming request
+
+
+------------------------------------------------------------------------------------------------------------
+AUTHENTICATION                                                                                             |
+------------------------------------------------------------------------------------------------------------
+Every system user must have own API key that will randomly generate and will send only once on (ADD NEW USER REQUEST)
+Admin api key can be set on docker start (pass as an argument) and can be changed (not 0.1 version)
+
+
+------------------------------------------------------------------------------------------------------------
+REQUESTS                                                                                                    |
+------------------------------------------------------------------------------------------------------------
+Request structure:
+    headers: {
+        'token': "",
+        'request_type': "" # Possible values : AddUserRequest / GetDataRequest (other in 1.0 or later) : ListTablesRequest / ListColumnsRequest ???
+    },
+    # GetDataRequest
+    body: {
+        'table': 'string',
+        'columns': 'list', # required: False / default: All (*),
+        'filter': { # required: False / default: None
+            'column': {
+                'filter_type': # Possible values: 'equal', 'more', 'less' # Later: 'between',
+                'value' : string(dt-format) or int
+            }
+        }
+        'filter_type': 'or' / 'and' # Required if filter contains more than 1 criteria
+        'limit': integer# required: False / default: None
+    }
+
+
+------------------------------------------------------------------------------------------------------------
+PLAN                                                                                                        |
+------------------------------------------------------------------------------------------------------------
+
+[x] Schema in pdf and draw io file
+[x] Module that take a dict (from json HTTP request) and transforms it into sql query (for postgre in 0.1) and parent class for other DB
+[x] Module that will read a DataBase structure and save it in local db(sqlite or smth) or in yaml (for postgre in 0.1)
+[x] TokenWorker with functions:
+    1) generate token
+    2) validate token (is token has access to table)
+    3) remove token
+[x] REST worker for incoming GET requests (manage requests)
+[x] REST worker for responses (transform data to json)
+[] Combine ALL
+[] Release 0.1
+[] Logs to external database support
+[] Module for sql request and reading database structure for mqsql
+[] Release 0.2
+[] Module for sql request and reading database structure for Oracle
+[] Add isin as filter
+[] Views feature (user save his query with some name and than just call this like table by view name)
+[] Release 0.3
+[] Prometheus/node exporter/graphana option for docker
+[] Module for sql request and reading database structure for clickhouse
+[] Release 0.4
+[] Release 1.0
+[] Gui (may be JS) for admnistration
+[] Release 2.0

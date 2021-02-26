@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.vscode.
+
+.idea/
+
+.vscode/
+
+conf/pg_hba.conf
