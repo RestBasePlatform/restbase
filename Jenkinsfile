@@ -10,7 +10,7 @@ pipeline {
     agent any
 
     stages {
-        
+
         stage("Tests"){
             steps{
                 script{
@@ -30,7 +30,7 @@ pipeline {
                 }
             }
             }
-    
+
         stage("Push to dockerhub"){
             steps{
                 script{
