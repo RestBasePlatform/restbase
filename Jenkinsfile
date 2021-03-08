@@ -25,11 +25,11 @@ pipeline {
 
         stage("Build docker image"){
             steps{
+                script {
                 dockerImage = docker.build image_name
+                }
             }
             }
-            }
-        }
     
         stage("Push to dockerhub"){
             steps{
