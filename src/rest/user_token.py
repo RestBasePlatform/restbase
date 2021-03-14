@@ -28,7 +28,7 @@ class UserToken(Resource):
             in self.rest_helper.local_worker.get_tokens_list()
         ) or (
             request.args.get(USER_TOKEN_NAME_FIELD_NAME)
-            in self.rest_helper.local_worker.get_tokens_names_list()
+            in self.rest_helper.local_worker.get_user_tokens_names_list()
         ):
             return make_response(
                 {"status": "error", "message": "Token already exists"}, 409

@@ -185,15 +185,16 @@ class LocalBaseWorker:
         ]
 
     def get_admin_tokens_objects_list(self) -> List[TokenTable]:
-        # Returns only tokens with access
+        # Returns only tokens with admin access
         return [
             i for i in get_existing_data(self.db_session, TokenTable) if i.admin_access
         ]
 
     def get_tokens_list(self) -> List[str]:
+        # Returns all tokens (with admin access and without admin access)
         return [i.token for i in get_existing_data(self.db_session, TokenTable)]
 
-    def get_tokens_names_list(self) -> List[str]:
+    def get_user_tokens_names_list(self) -> List[str]:
         return [i.name for i in self.get_user_tokens_objects_list()]
 
     def add_table_for_token(
@@ -205,6 +206,15 @@ class LocalBaseWorker:
         local_table_name: str = None,
         token_name: str = None,
     ):
+        """
+        Add token access for select requests for table
+        :param token: token to grant access
+        :param database_name: local database name where table located
+        :param folder_name: folder name in database where table located
+        :param table_name: table name in database where table located
+        :param local_table_name: local name of table (if pass local_table_name than database_name/folder_name/table_name will be ignored) # noqa: E501
+        :param token_name: token name to grant access (if passed token - token_name will be ignored)
+        """
         if not local_table_name:
             local_table_name = self.get_local_table_name(
                 database_name=database_name,
@@ -231,6 +241,10 @@ class LocalBaseWorker:
         folder_name: str,
         table_name: str,
     ):
+        # In mysql folder has same name as database
+        if self.get_database_object(database_name).type == "mysql":
+            folder_name = database_name
+
         table_object = (
             self.db_session.query(TablesInfoTable)
             .filter_by(

@@ -38,6 +38,18 @@ def postgre_db_data():
     }
 
 
+@pytest.fixture()
+def mysql_db_data():
+    return {
+        "local_database_name": "test-base-mysql",
+        "ip": "mysql_test_base",
+        "port": "3306",
+        "database": "mysql",
+        "username": "root",
+        "password": "password",
+    }
+
+
 class Helpers:
     @staticmethod
     def get_column_data_from_table(session, table_object, col_name):

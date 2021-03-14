@@ -61,7 +61,7 @@ def test_generate_random_user_token(internal_db_session):
     assert response.status_code == 409
 
 
-def test_add_database(internal_db_session, postgre_db_data):
+def test_add_database_postgres(internal_db_session, postgre_db_data):
     headers = {"admin_token": "admin-test-token"}
 
     body = {"base_type": "postgres", "description": "test-base", **postgre_db_data}
@@ -76,6 +76,27 @@ def test_add_database(internal_db_session, postgre_db_data):
     bases = pd.read_sql("SELECT * FROM bases", con=internal_db_session)
     assert "test_table_1" in tables["table_name"].values
     assert "test-base" in bases["local_name"].values
+
+
+def test_add_database_mysql(internal_db_session, mysql_db_data):
+    headers = {"admin_token": "admin-test-token"}
+
+    body = {"base_type": "mysql", "description": "test-base", **mysql_db_data}
+
+    response = requests.put("http://api:54541/Database", headers=headers, params=body)
+    print(response.text)
+    assert response.status_code == 200
+    # Check that cant add the same base again
+    response = requests.put("http://api:54541/Database", headers=headers, params=body)
+    assert response.status_code == 500
+    #
+    tables = pd.read_sql(
+        f"""SELECT * FROM tables_info where database_name = '{mysql_db_data["local_database_name"]}'""",
+        con=internal_db_session,
+    )
+    bases = pd.read_sql("SELECT * FROM bases", con=internal_db_session)
+    assert "test_table_1" in tables["table_name"].values
+    assert "test-base-mysql" in bases["local_name"].values
 
 
 def test_grant_table_access_with_local_table_name(internal_db_session, postgre_db_data):
@@ -182,14 +203,17 @@ def test_grant_table_access_without_local_table_name(
     )
 
 
-def test_list_databases(internal_db_session, postgre_db_data):
+def test_list_databases(internal_db_session, postgre_db_data, mysql_db_data):
     headers = {"admin_token": "admin-test-token"}
 
     response = requests.get("http://api:54541/Database/list", headers=headers)
     response_body = json.loads(response.text)
     assert response.status_code == 200
 
-    assert set(response_body["List"]) == {postgre_db_data["local_database_name"]}
+    assert set(response_body["List"]) == {
+        postgre_db_data["local_database_name"],
+        mysql_db_data["local_database_name"],
+    }
 
 
 def test_rename_table_by_local_table_name(internal_db_session, postgre_db_data):
