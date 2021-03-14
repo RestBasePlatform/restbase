@@ -3,7 +3,6 @@ from flask import request
 from flask_restful import Resource
 
 from .common_rest import RestCommon
-from exceptions import DatabaseAlreadyExistsError
 from fields import ADMIN_TOKEN_FIELD_NAME
 from fields import DATABASE_DB_NAME_FIELD_NAME
 from fields import DATABASE_IP_FIELD_NAME
@@ -83,7 +82,7 @@ class Database(Resource):
                     token, local_table_name=local_table_name
                 )
             return make_response({"status": "success", "local_name": local_name}, 200)
-        except (DatabaseAlreadyExistsError, ConnectionError) as e:
+        except Exception as e:
             if local_name:
                 self.rest_helper.local_worker.remove_database(local_name)
 

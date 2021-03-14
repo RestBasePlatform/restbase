@@ -42,7 +42,7 @@ class RequestValidator:
 
     @staticmethod
     def check_if_database_type_is_supported(db_type: str):
-        return db_type in ["postgres"]
+        return db_type in ["postgres", "mysql"]
 
     @staticmethod
     def is_all_database_params_defined(request_args: dict) -> bool:
