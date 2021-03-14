@@ -3,7 +3,10 @@ import os
 import pandas as pd
 import sqlalchemy
 
-DB_STRINGS = ["postgresql://postgres:password@postgres_test_base/postgres"]
+DB_STRINGS = [
+    "postgresql://postgres:password@postgres_test_base/postgres",
+    "mysql+pymysql://root:password@mysql_test_base/test_db",
+]
 
 TEST_TABLES_DUMPS = ["test_data.csv"]
 
@@ -11,7 +14,7 @@ TEST_TABLES_DUMPS = ["test_data.csv"]
 if __name__ == "__main__":
 
     for db_string in DB_STRINGS:
-        # Replace URL in alebic config
+        # Replace URL in alembic config
         with open("alembic_test_db/alembic.ini") as f:
             file_data = f.read()
 
