@@ -110,46 +110,6 @@ def test_add_database(internal_db_session, db_data):
     assert db_data["local_database_name"] in bases["local_name"].values
 
 
-#
-# def test_add_database_postgres(internal_db_session, postgre_db_data):
-#     headers = {"admin_token": "admin-test-token"}
-#
-#     body = {"base_type": "postgres", "description": "test-base", **postgre_db_data}
-#
-#     response = requests.put("http://api:54541/Database", headers=headers, params=body)
-#     assert response.status_code == 200
-#     # Check that cant add the same base again
-#     response = requests.put("http://api:54541/Database", headers=headers, params=body)
-#     assert response.status_code == 500
-#
-#     tables = pd.read_sql("SELECT * FROM tables_info", con=internal_db_session)
-#     bases = pd.read_sql("SELECT * FROM bases", con=internal_db_session)
-#     assert "test_table_1" in tables["table_name"].values
-#     assert "test-base" in bases["local_name"].values
-#
-#
-# def test_add_database_mysql(internal_db_session, mysql_db_data):
-#     headers = {"admin_token": "admin-test-token"}
-#
-#     body = {"base_type": "mysql", "description": "test-base", **mysql_db_data}
-#
-#     response = requests.put("http://api:54541/Database", headers=headers, params=body)
-#     print(response.text)
-#     assert response.status_code == 200
-#     # Check that cant add the same base again
-#     response = requests.put("http://api:54541/Database", headers=headers, params=body)
-#     assert response.status_code == 500
-#     #
-#     tables = pd.read_sql(
-#         f"""SELECT * FROM tables_info where database_name = '{mysql_db_data["local_database_name"]}'""",
-#         con=internal_db_session,
-#     )
-#     bases = pd.read_sql("SELECT * FROM bases", con=internal_db_session)
-#     assert "test_table_1" in tables["table_name"].values
-#     assert "test-base-mysql" in bases["local_name"].values
-#
-
-
 def test_grant_table_access_with_local_table_name(internal_db_session, postgre_db_data):
 
     # Check that for None token we got bad request
