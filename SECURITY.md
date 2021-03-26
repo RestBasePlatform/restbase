@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-All 0.1.x versions are now in supprot 
+All 0.1.x versions are now in supprot
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -11,4 +11,4 @@ All 0.1.x versions are now in supprot
 
 ## Reporting a Vulnerability
 
-To report a vulnerability creare an issues with label Vulnerability. 
+To report a vulnerability creare an issues with label Vulnerability.
