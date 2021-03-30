@@ -26,7 +26,7 @@ pipeline {
         stage("Build docker image"){
             steps{
                 script {
-                dockerImage = docker.build image_name
+                    dockerImage = docker.build image_name
                 }
             }
             }
@@ -34,8 +34,13 @@ pipeline {
         stage("Push to dockerhub"){
             steps{
                 script{
+                    version = readFile "VERSION"
                     docker.withRegistry('https://index.docker.io/v1/', registryCredential ) {
+                        if (env.BRANCH_NAME == 'develop') {
+                            dockerImage.push(version)
+                        }
                         if ((env.BRANCH_NAME == 'master') || (env.BRANCH_NAME == 'main')){
+                            dockerImage.push(version)
                             dockerImage.push('latest')
                         }
                         else {
