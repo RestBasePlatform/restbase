@@ -19,6 +19,7 @@ from rest import Database
 from rest import ListDatabase
 from rest import ListTable
 from rest import ListUserToken
+from rest import Logs
 from rest import Table
 from rest import UserToken
 from rest.common_rest import RestCommon
@@ -100,6 +101,15 @@ app_new.add_resource(
     ListTable,
     "/Table/list",
     "/Table/list/",
+    methods=["GET"],
+    resource_class_kwargs={"rest_helper": rest_helper},
+)
+
+
+app_new.add_resource(
+    Logs,
+    "/Logs/",
+    "/Logs",
     methods=["GET"],
     resource_class_kwargs={"rest_helper": rest_helper},
 )

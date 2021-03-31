@@ -99,3 +99,12 @@ class Logger:
 
     def exception(self, message: str):
         self.logger.error(message)
+
+
+def _init_logger():
+    loguru.logger.add(
+        "../logs/debug.log",
+        format="{time} {level} {message}",
+        filter=lambda record: record["level"].name == "DEBUG",
+        rotation="10 MB",
+    )
