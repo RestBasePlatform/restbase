@@ -95,7 +95,7 @@ class RequestValidator:
             )
         )
 
-    def validate_list_databases_request(self, request: flask.request):
+    def validate_admin_header_only(self, request: flask.request):
         return self.is_admin_header_valid(request.headers)
 
     def validate_get_database_data_request(self, request: flask.request):

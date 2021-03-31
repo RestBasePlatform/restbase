@@ -152,9 +152,7 @@ class ListDatabase(Resource):
         self.rest_helper = rest_helper
 
     def get(self):
-        if not self.rest_helper.request_validator.validate_list_databases_request(
-            request
-        ):
+        if not self.rest_helper.request_validator.validate_admin_header_only(request):
             self.rest_helper.logger.log_incorrect_request("/ListDatabase/Get/", request)
             return make_response(*self.rest_helper.get_bad_request_answer())
 
