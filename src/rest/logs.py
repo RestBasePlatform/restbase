@@ -57,7 +57,7 @@ class Logs(Resource):
                 request.headers.get(ADMIN_TOKEN_FIELD_NAME),
                 "error",
                 request,
-                failure_reason=e,
+                failure_reason=str(e),
             )
             return make_response(
                 {
