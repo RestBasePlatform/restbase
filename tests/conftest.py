@@ -29,11 +29,25 @@ def internal_db_session():
 @pytest.fixture
 def postgre_db_data():
     return {
+        "type": "postgres",
         "local_database_name": "test-base",
         "ip": "postgres_test_base",
         "port": "5432",
         "database": "postgres",
         "username": "postgres",
+        "password": "password",
+    }
+
+
+@pytest.fixture()
+def mysql_db_data():
+    return {
+        "type": "mysql",
+        "local_database_name": "test-base-mysql",
+        "ip": "mysql_test_base",
+        "port": "3306",
+        "database": "mysql",
+        "username": "root",
         "password": "password",
     }
 
