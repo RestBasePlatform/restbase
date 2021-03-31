@@ -2,6 +2,7 @@ from .admin_token import AdminToken
 from .common_rest import RestCommon
 from .database import Database
 from .database import ListDatabase
+from .logs import Logs
 from .table import ListTable
 from .table import Table
 from .user_token import ListUserToken
@@ -17,4 +18,5 @@ __all__ = [
     "Table",
     "ListUserToken",
     "UserToken",
+    "Logs",
 ]
