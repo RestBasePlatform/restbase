@@ -100,6 +100,9 @@ class Logger:
     def exception(self, message: str):
         self.logger.error(message)
 
+    def error(self, message: str):
+        self.logger.error(message)
+
 
 def _init_logger():
     loguru.logger.add(
