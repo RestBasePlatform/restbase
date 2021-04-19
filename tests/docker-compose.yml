@@ -5,15 +5,42 @@ services:
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_HOST_AUTH_METHOD: trust
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       restbase_test_network:
         ipv4_address: "10.5.0.5"
+
+  mysql_test_base:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_DATABASE: test_db
+      MYSQL_ROOT_PASSWORD: password
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+    ports:
+      - "3306:3306"
+    networks:
+      restbase_test_network:
+        ipv4_address: "10.5.0.6"
 
   postgres_test_base:
     image: postgres
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_HOST_AUTH_METHOD: trust
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       restbase_test_network:
         ipv4_address: "10.5.0.2"
@@ -23,8 +50,12 @@ services:
       context: ..
       dockerfile: Dockerfile
     depends_on:
-      - postgres_test_base
-      - postgres
+      postgres_test_base:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      mysql_test_base:
+        condition: service_healthy
     environment:
       STAGE: test
     ports:
@@ -42,6 +73,7 @@ services:
       - postgres_test_base
       - api
       - postgres
+      - mysql_test_base
     networks:
       restbase_test_network:
         ipv4_address: "10.5.0.4"
@@ -51,5 +83,5 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 10.5.0.0/16
+        - subnet: 10.5.0.0/27
           gateway: 10.5.0.1

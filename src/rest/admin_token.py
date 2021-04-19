@@ -13,6 +13,8 @@ class AdminToken(Resource):
     def get(self):
         try:
             new_token = self.rest_helper.token_worker.add_admin_token()
+            self.rest_helper.logger.info("Admin token generated successfully")
             return make_response({"admin-token": new_token}, 200)
         except AdminTokenExistsError:
+            self.rest_helper.logger.error("Admin token can only be generated once")
             return make_response("Admin token already exists", 409)

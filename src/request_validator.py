@@ -42,7 +42,7 @@ class RequestValidator:
 
     @staticmethod
     def check_if_database_type_is_supported(db_type: str):
-        return db_type in ["postgres"]
+        return db_type in ["postgres", "mysql"]
 
     @staticmethod
     def is_all_database_params_defined(request_args: dict) -> bool:
@@ -95,7 +95,7 @@ class RequestValidator:
             )
         )
 
-    def validate_list_databases_request(self, request: flask.request):
+    def validate_admin_header_only(self, request: flask.request):
         return self.is_admin_header_valid(request.headers)
 
     def validate_get_database_data_request(self, request: flask.request):
