@@ -1,5 +1,6 @@
 import datetime
 from typing import List
+import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -18,10 +19,10 @@ from utils import get_existing_data
 class LocalBaseWorker:
     def __init__(
         self,
-        ip="localhost",
-        user="postgres",
-        password="password",
-        database_name="postgres",
+        ip=os.getenv("internal_db_ip"),
+        user=os.getenv("internal_db_user"),
+        password=os.getenv("internal_db_password"),
+        database_name=os.getenv("internal_db_database_name"),
     ):
         self.db_session = self._get_connection(ip, user, password, database_name)
 
