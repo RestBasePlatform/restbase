@@ -2,7 +2,6 @@
 
 pipeline {
     environment {
-        image_name = "restbase/restbase-server"
         registryCredential = 'dockerhub'
         dockerImage = ''
     }
@@ -14,6 +13,12 @@ pipeline {
         stage("Tests"){
             steps{
                 script{
+                    if ((env.BRANCH_NAME == 'master') || (env.BRANCH_NAME == 'main') || (env.BRANCH_NAME == 'develop')){
+                        image_name = "restbase/restbase-server"
+                    }
+                    else {
+                        image_name = "restbase/restbase-server-dev"
+                    }
                 dir(path: 'tests') {
                         sh (
                             script: 'bash localtest.sh',

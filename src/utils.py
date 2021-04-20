@@ -40,7 +40,10 @@ def get_existing_data(
     if not getattr(table_class_object, "__tablename__"):
         raise ValueError("Получен неверный table_class_object.")
 
-    data = sql_session.query(table_class_object).all()
+    try:
+        data = sql_session.query(table_class_object).all()
+    except:  # noqa: E722
+        sql_session.rollback()
 
     return [getattr(i, target_attr) for i in data] if target_attr else data
 

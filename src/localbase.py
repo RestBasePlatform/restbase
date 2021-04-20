@@ -33,6 +33,25 @@ class LocalBaseWorker:
             bind=create_engine(f"postgresql://{user}:{password}@{ip}/{database_name}")
         )
 
+    def execute_database_action(self, extraction_object, action, **filters):
+        try:
+            return (
+                getattr(
+                    self.db_session.query(extraction_object).filter_by(**filters),
+                    action,
+                )
+            )()
+        except:  # noqa: E722
+            self.db_session.rollback()
+            raise
+
+    def _commit(self):
+        try:
+            self.db_session.commit()
+        except:  # noqa: E722
+            self.db_session.rollback()
+            raise
+
     def add_database(
         self, base_type, description, local_name=None, **con_params
     ) -> str:
@@ -54,7 +73,7 @@ class LocalBaseWorker:
         )
 
         self.db_session.add(new_database)
-        self.db_session.commit()
+        self._commit()
 
         return local_name
 
@@ -62,14 +81,14 @@ class LocalBaseWorker:
         # Don't execute in local database when local_name is False
         # In Database/Put except block we pass none
         if local_name:
-            self.db_session.query(BasesTable).filter_by(local_name=local_name).delete()
-            self.db_session.commit()
+            self.execute_database_action(
+                BasesTable, action="delete", local_name=local_name
+            )
+            self._commit()
 
     def get_database_and_connection(self, local_base_name: str):
-        database_obj = (
-            self.db_session.query(BasesTable)
-            .filter_by(local_name=local_base_name)
-            .first()
+        database_obj = self.execute_database_action(
+            BasesTable, "first", local_name=local_base_name
         )
 
         return database_obj, get_db_engine(
@@ -101,17 +120,15 @@ class LocalBaseWorker:
             columns=columns,
         )
 
-        exist_obj = (
-            self.db_session.query(TablesInfoTable)
-            .filter_by(local_name=new_table.local_name)
-            .first()
+        exist_obj = self.execute_database_action(
+            TablesInfoTable, "first", local_name=new_table.local_name
         )
         if not exist_obj:
             self.db_session.add(new_table)
         else:
             for attr in ["table_name", "folder_name", "database_name", "columns"]:
                 setattr(exist_obj, attr, getattr(new_table, attr))
-        self.db_session.commit()
+        self._commit()
         return local_name
 
     def get_table(
@@ -122,17 +139,17 @@ class LocalBaseWorker:
         local_table_name: str = None,
     ) -> TablesInfoTable:
         return (
-            self.db_session.query(TablesInfoTable)
-            .filter_by(local_name=local_table_name)
-            .first()
+            self.execute_database_action(
+                TablesInfoTable, "first", local_name=local_table_name
+            )
             if local_table_name
-            else self.db_session.query(TablesInfoTable)
-            .filter_by(
+            else self.execute_database_action(
+                TablesInfoTable,
+                "first",
                 database_name=database_name,
                 folder_name=folder_name,
                 table_name=table_name,
             )
-            .first()
         )
 
     def get_table_params(self, local_table_name: str) -> dict:
@@ -145,10 +162,8 @@ class LocalBaseWorker:
         }
 
     def get_database_object(self, local_database_name: str) -> BasesTable:
-        return (
-            self.db_session.query(BasesTable)
-            .filter_by(local_name=local_database_name)
-            .first()
+        return self.execute_database_action(
+            BasesTable, "first", local_name=local_database_name
         )
 
     def get_database_data(self, local_database_name: str):
@@ -177,7 +192,7 @@ class LocalBaseWorker:
         )
 
         self.db_session.add(new_token)
-        self.db_session.commit()
+        self._commit()
 
     def get_user_tokens_objects_list(self) -> List[TokenTable]:
         # Returns only tokens without admin access
@@ -226,9 +241,9 @@ class LocalBaseWorker:
             )
 
         if token:
-            row = self.db_session.query(TokenTable).filter_by(token=token).first()
+            row = self.execute_database_action(TokenTable, "first", token=token)
         elif token_name:
-            row = self.db_session.query(TokenTable).filter_by(name=token_name).first()
+            row = self.execute_database_action(TokenTable, "first", name=token_name)
 
         if not self.is_table_exists(local_table_name=local_table_name):
             raise TableNotFoundError(local_table_name)
@@ -236,7 +251,7 @@ class LocalBaseWorker:
             raise AccessAlreadyGrantedError(local_table_name)
         row.granted_tables = row.granted_tables + [local_table_name]
 
-        self.db_session.commit()
+        self._commit()
 
     def get_local_table_name(
         self,
@@ -248,23 +263,19 @@ class LocalBaseWorker:
         if self.get_database_object(database_name).type == "mysql":
             folder_name = database_name
 
-        table_object = (
-            self.db_session.query(TablesInfoTable)
-            .filter_by(
-                database_name=database_name,
-                folder_name=folder_name,
-                table_name=table_name,
-            )
-            .first()
+        table_object = self.execute_database_action(
+            TablesInfoTable,
+            "first",
+            database_name=database_name,
+            folder_name=folder_name,
+            table_name=table_name,
         )
         return table_object.local_name if table_object else None
 
     def get_token_tables(self, token: str) -> list:
-        return (
-            self.db_session.query(TokenTable)
-            .filter_by(token=token)
-            .first()
-            .granted_tables
+        return getattr(
+            self.execute_database_action(TokenTable, "first", token=token),
+            "granted_tables",
         )
 
     def is_table_exists(
@@ -275,24 +286,18 @@ class LocalBaseWorker:
         local_table_name: str = None,
     ):
         return (
-            (
-                self.db_session.query(TablesInfoTable)
-                .filter_by(local_name=local_table_name)
-                .first()
-                is not None
+            self.execute_database_action(
+                TablesInfoTable, "first", local_name=local_table_name
             )
             if local_table_name
-            else (
-                self.db_session.query(TablesInfoTable)
-                .filter_by(
-                    database_name=database_name,
-                    folder_name=folder_name,
-                    table_name=table_name,
-                )
-                .first()
+            else self.execute_database_action(
+                TablesInfoTable,
+                "first",
+                database_name=database_name,
+                folder_name=folder_name,
+                table_name=table_name,
             )
-            is not None
-        )
+        ) is not None
 
     def get_base_of_table(
         self,
@@ -302,22 +307,22 @@ class LocalBaseWorker:
         local_table_name: str = None,
     ):
         return (
-            (
-                self.db_session.query(TablesInfoTable)
-                .filter_by(local_name=local_table_name)
-                .first()
-                .database_name
+            getattr(
+                self.execute_database_action(
+                    TablesInfoTable, "first", local_name=local_table_name
+                ),
+                "database_name",
             )
             if local_table_name
-            else (
-                self.db_session.query(TablesInfoTable)
-                .filter_by(
+            else getattr(
+                self.execute_database_action(
+                    TablesInfoTable,
+                    "first",
                     database_name=database_name,
                     folder_name=folder_name,
                     table_name=table_name,
-                )
-                .first()
-                .database_name
+                ),
+                "database_name",
             )
         )
 
@@ -325,17 +330,16 @@ class LocalBaseWorker:
         self, local_table_name: str = None, local_db_name: str = None
     ) -> str:
         if local_table_name:
-            local_db_name = (
-                self.db_session.query(TablesInfoTable)
-                .filter_by(local_name=local_table_name)
-                .first()
-                .database_name
+            local_db_name = getattr(
+                self.execute_database_action(
+                    TablesInfoTable, "first", local_name=local_table_name
+                ),
+                "database_name",
             )
-        return (
-            self.db_session.query(BasesTable)
-            .filter_by(local_name=local_db_name)
-            .first()
-            .type
+
+        return getattr(
+            self.execute_database_action(BasesTable, "first", local_name=local_db_name),
+            "type",
         )
 
     @property
@@ -350,15 +354,15 @@ class LocalBaseWorker:
         )
 
     def get_local_database_name(self, ip: str, port: str, database: str) -> str:
-        return (
-            self.db_session.query(TablesInfoTable)
-            .filter_by(
+        return getattr(
+            self.execute_database_action(
+                TablesInfoTable,
+                "first",
                 ip=ip,
                 port=port,
                 database=database,
-            )
-            .first()
-            .local_name
+            ),
+            "local_name",
         )
 
     def get_database_tables(self, database_name: str):
@@ -412,9 +416,9 @@ class LocalBaseWorker:
             )
 
             self.db_session.delete(table_obj)
-            self.db_session.commit()
+            self._commit()
             self.db_session.add(new_table_obj)
-            self.db_session.commit()
+            self._commit()
 
             # Replace name in granter_tables fields in user and admin tokens after rename
             for token in (
@@ -427,4 +431,4 @@ class LocalBaseWorker:
                         for i in token.granted_tables
                     ]
 
-        self.db_session.commit()
+        self._commit()
