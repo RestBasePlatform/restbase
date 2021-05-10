@@ -18,7 +18,18 @@ class TokenTable(Base):
     granted_tables = Column(postgresql.ARRAY(postgresql.TEXT, dimensions=1))
     admin_access = Column(Boolean)
     create_date = Column(DateTime)
+    main_admin = Column(Boolean)
     name = Column(String)
+
+    def prepare_for_return(self):
+        return {
+            "name": self.name,
+            "token": self.token,
+            "description": self.description,
+            "granted_tables": self.granted_tables,
+            "admin_access": self.admin_access,
+            "create_date": self.create_date,
+        }
 
 
 class BasesTable(Base):

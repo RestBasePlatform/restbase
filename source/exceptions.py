@@ -8,6 +8,11 @@ class AdminTokenExistsError(Exception):
         super().__init__("Admin token already exists")
 
 
+class TokenExistsError(Exception):
+    def __init__(self):
+        super().__init__("Token already exists")
+
+
 class TableNotFoundError(Exception):
     def __init__(self, table_name):
         super().__init__(f'Table "{table_name}" not found')

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from exceptions import AccessAlreadyGrantedError
 from exceptions import DatabaseAlreadyExistsError
 from exceptions import TableNotFoundError
+from exceptions import TokenExistsError
 from tables import BasesTable
 from tables import TablesInfoTable
 from tables import TokenTable
@@ -23,7 +24,7 @@ class LocalBaseWorker:
         user=os.getenv("internal_db_user"),
         password=os.getenv("internal_db_password"),
         database_name=os.getenv("internal_db_database_name"),
-        port=os.getenv('internal_db_port'),
+        port=os.getenv("internal_db_port"),
     ):
         self.db_session = self._get_connection(ip, user, password, database_name, port)
 
@@ -31,9 +32,12 @@ class LocalBaseWorker:
     def _get_connection(
         ip: str, user: str, password: str, database_name: str, port: str
     ) -> Session:
-        return Session(
-            bind=create_engine(f"postgresql://{user}:{password}@{ip}:{port}/{database_name}")
+        engine = create_engine(
+            f"postgresql://{user}:{password}@{ip}:{port}/{database_name}"
         )
+        if not database_health_check(engine):
+            raise ConnectionError(f"Database '{ip}' is not available")
+        return Session(bind=engine)
 
     def execute_database_action(self, extraction_object, action, **filters):
         try:
@@ -183,7 +187,20 @@ class LocalBaseWorker:
     def get_local_name_list(self) -> list:
         return get_existing_data(self.db_session, TablesInfoTable, "local_name")
 
-    def add_token(self, name: str, new_token: str, description: str, is_admin=False):
+    def add_token(
+        self,
+        name: str,
+        new_token: str,
+        description: str,
+        is_admin=False,
+        is_main_admin: bool = False,
+    ):
+        if name in get_existing_data(
+            self.db_session,
+            TokenTable,
+            target_attr="name",
+        ):
+            raise TokenExistsError()
         new_token = TokenTable(
             name=name,
             token=new_token,
@@ -191,6 +208,7 @@ class LocalBaseWorker:
             granted_tables=[],
             admin_access=is_admin,
             create_date=datetime.datetime.now(),
+            main_admin=is_main_admin,
         )
 
         self.db_session.add(new_token)
@@ -207,15 +225,23 @@ class LocalBaseWorker:
     def get_admin_tokens_objects_list(self) -> List[TokenTable]:
         # Returns only tokens with admin access
         return [
-            i for i in get_existing_data(self.db_session, TokenTable) if i.admin_access
+            i
+            for i in get_existing_data(self.db_session, TokenTable)
+            if i.admin_access and not i.main_admin
+        ]
+
+    def get_main_admin_tokens_objects_list(self) -> List[TokenTable]:
+        # Returns only tokens with admin access
+        return [
+            i for i in get_existing_data(self.db_session, TokenTable) if i.main_admin
         ]
 
     def get_tokens_list(self) -> List[str]:
         # Returns all tokens (with admin access and without admin access)
         return [i.token for i in get_existing_data(self.db_session, TokenTable)]
 
-    def get_user_tokens_names_list(self) -> List[str]:
-        return [i.name for i in self.get_user_tokens_objects_list()]
+    def get_tokens_name_list(self) -> List[str]:
+        return [i.name for i in get_existing_data(self.db_session, TokenTable)]
 
     def add_table_for_token(
         self,

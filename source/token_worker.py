@@ -14,16 +14,22 @@ class TokenWorker:
         self,
         token_name: str,
         description: str = None,
-        access_tables: typing.List[str] = [],
+        access_tables: typing.List[str] = (),
         token: str = None,
         is_admin: bool = False,
+        is_main_admin: bool = False,
     ):
         if not token:
             token = self.generate_token()
-        if is_admin and self.local_base_worker.is_main_admin_token_exists:
+        if is_main_admin and self.local_base_worker.is_main_admin_token_exists:
             raise AdminTokenExistsError
+
         self.local_base_worker.add_token(
-            token_name, token, description, is_admin=is_admin
+            token_name,
+            token,
+            description,
+            is_admin=is_admin,
+            is_main_admin=is_main_admin,
         )
 
         for table in access_tables:
@@ -42,8 +48,13 @@ class TokenWorker:
             random.choice(string.ascii_uppercase + string.digits) for _ in range(64)
         )
 
-    def add_admin_token(self) -> str:
-        return self.add_token("main_admin", "main admin token", is_admin=True)
+    def add_main_admin_token(self) -> str:
+        return self.add_token(
+            "main_admin", "main admin token", is_admin=True, is_main_admin=True
+        )
+
+    def add_admin_token(self, token_name: str, description: str = "admin token") -> str:
+        return self.add_token(token_name, description, is_admin=True)
 
     def is_token_admin(self, token) -> bool:
         return token in [

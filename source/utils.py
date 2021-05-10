@@ -1,9 +1,8 @@
 import os
-
-from sqlalchemy.exc import OperationalError
-from sqlalchemy import create_engine
-
 import typing
+
+from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
 
 
 def run_migrations():
@@ -16,12 +15,10 @@ def run_migrations():
     port = os.getenv("internal_db_port")
     database = os.getenv("internal_db_database_name")
 
-    ssl = "" if os.getenv("TESTS") else "?sslmode=require"
-
     with open("alembic.ini") as f:
         data = f.read()
     data = data.replace(
-        "%URL%", f"postgresql://{user}:{password}@{ip}:{port}/{database}" + ssl
+        "%URL%", f"postgresql://{user}:{password}@{ip}:{port}/{database}"
     )
 
     with open("alembic.ini", "w") as f:
@@ -50,6 +47,7 @@ def get_db_engine(db_type: str, **con_params):
             f"{con_params.get('ip')}:{con_params.get('port')}/{con_params.get('database')}"
         )
 
+
 def get_existing_data(
     sql_session, table_class_object, target_attr: str = None
 ) -> typing.List:
@@ -60,5 +58,10 @@ def get_existing_data(
         data = sql_session.query(table_class_object).all()
     except:  # noqa: E722
         sql_session.rollback()
+        raise ConnectionError("Database transaction error")
 
     return [getattr(i, target_attr) for i in data] if target_attr else data
+
+
+def validate_request():
+    pass
