@@ -34,6 +34,8 @@ jobs:
 
        - name: "Install requirements for tests"
          run: pip3 install -r test/requirements.txt
+       - name: "Check logs"
+         run: docker logs test_restbase
 
        - name: "Tests"
          run: pytest -v test/
