@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from fastapi import Request
 from schemas import BaseHeader
 from schemas import GenerateAdminToken
+from pydantic import ValidationError
 
 from . import RestBaseTokensRouter
 from localbase import LocalBaseWorker
@@ -25,9 +26,9 @@ async def generate_main_admin_token():
 
 @RestBaseTokensRouter.post("/AdminToken/Generate/")
 async def generate_admin_token(request: Request):
-    headers = BaseHeader(**request.headers)
-    body = GenerateAdminToken(**json.loads(await request.body()))
     try:
+        headers = BaseHeader(**request.headers)
+        body = GenerateAdminToken(**json.loads(await request.body()))
         local_base_worker = LocalBaseWorker()
         if headers.token not in [
             i.token for i in local_base_worker.get_main_admin_tokens_objects_list()
@@ -43,11 +44,11 @@ async def generate_admin_token(request: Request):
         )
         return admin_token
     except Exception as e:
-        if not isinstance(e, HTTPException):
-            raise HTTPException(
-                status_code=502, detail={"status": "Error", "message": str(e)}
-            )
-        raise
+        if isinstance(e, HTTPException) or isinstance(e, ValidationError):
+            raise
+        raise HTTPException(
+            status_code=502, detail={"status": "Error", "message": str(e)}
+        )
 
 
 @RestBaseTokensRouter.get("/AdminToken/List/")

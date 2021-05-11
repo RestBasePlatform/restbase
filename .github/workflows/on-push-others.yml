@@ -32,6 +32,13 @@ jobs:
        - name: "Start container"
          run: docker run --network="host" --name test_restbase -p 54541:54541 -d restbase/restbase-server-dev:$(cat VERSION)
 
+
+       - name: "Install requirements for tests"
+         run: pip3 install -r test/requirements.txt
+
+       - name: "Tests"
+         run: pytest -v test/
+
        - name: Publish on Docker hub
          run: |
            echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
