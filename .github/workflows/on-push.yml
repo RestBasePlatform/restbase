@@ -1,10 +1,13 @@
-name: Module tests with pytest
+name: Push image to DockerHub
 on: push
-
+branches:
+  - develop
+  - RB-*
+  - fastapi
 
 jobs:
 
-   pytest-job:
+   Dockerhub Job:
      runs-on: ubuntu-latest
 
      steps:
@@ -14,7 +17,7 @@ jobs:
        - name: Publish Docker to Docker Hub
          uses: elgohr/Publish-Docker-Github-Action@master
          with:
-           name: catalystteam/catalyst
+           name: restbase/restbase-server
            username: ${{ secrets.DOCKER_USERNAME }}
            password: ${{ secrets.DOCKER_PASSWORD }}
            dockerfile: Dockerfile
