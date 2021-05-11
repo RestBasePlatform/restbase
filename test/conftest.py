@@ -22,7 +22,7 @@ def restbase_url():
 
 @pytest.fixture(scope="session")
 def postgres_engine():
-    db_str = "postgresql://postgres:password@internal_postgres/postgres"
+    db_str = "postgresql://postgres:password@localhost/postgres"
     engine = create_engine(db_str)
     return engine
 
