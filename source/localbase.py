@@ -404,7 +404,7 @@ class LocalBaseWorker:
         TEMP METHOD TO PREPARE DATABASE FOR TESTS
         """
         # Set admin token
-        db_str = "postgresql://postgres:password@localhost/postgres"
+        db_str = "postgresql://postgres:password@internal_postgres/postgres"
         internal_db_engine = create_engine(db_str)
         import pandas as pd
 
