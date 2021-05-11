@@ -11,7 +11,7 @@ from utils import get_existing_data
     "data_dict,expected_status_code",
     [
         ({"token_name": "test_token"}, 200),
-        ({"token_name": "test_token", "description": "test_description"}, 200),
+        ({"token_name": "test_token1", "description": "test_description"}, 200),
     ],
 )
 def test_generate_admin_token_correct_header(
@@ -26,7 +26,6 @@ def test_generate_admin_token_correct_header(
         headers={"token": test_main_admin_token},
         data=json.dumps(data_dict),
     )
-    print(response.text)
     assert response.status_code == expected_status_code
     new_token = response.text
 
