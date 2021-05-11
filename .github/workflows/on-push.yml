@@ -38,7 +38,7 @@ jobs:
        - name: "Export version"
          run: export RELEASE_VERSION=$(cat VERSION)
        - name: "Check version"
-         run: echo $RELEASE_VERSION
+         run: echo "${{ env.RELEASE_VERSION }}"
 
        - name: Publish Docker to Docker Hub
          uses: elgohr/Publish-Docker-Github-Action@master
@@ -47,4 +47,4 @@ jobs:
            username: ${{ secrets.DOCKER_USERNAME }}
            password: ${{ secrets.DOCKER_PASSWORD }}
            dockerfile: Dockerfile
-           tags: $RELEASE_VERSION
+           tags: "${{ env.RELEASE_VERSION }}"
