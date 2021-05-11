@@ -1,0 +1,13 @@
+name: Module tests with pytest
+on: push
+
+
+jobs:
+
+   pytest-job:
+     runs-on: ubuntu-latest
+
+     steps:
+       - uses: actions/checkout@v2
+       - name: "tests"
+         run: cd tests && bash localtest.sh
