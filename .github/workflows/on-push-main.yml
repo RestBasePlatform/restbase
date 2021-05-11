@@ -2,9 +2,7 @@ name: Push image to DockerHub
 on:
   push:
     branches:
-      - develop
-      - RB-*
-      - fastapi
+      - main
 
 jobs:
 
@@ -27,15 +25,12 @@ jobs:
        - uses: actions/checkout@v2
 
        - name: "Build image"
-         run: docker build -t restbase/restbase-server-dev:$(cat VERSION) .
+         run: docker build -t restbase/restbase-server:$(cat VERSION) .
 
        - name: "Start container"
          run: docker run --network="host" --name test_restbase -p 54541:54541 -d restbase/restbase-server-dev:$(cat VERSION)
 
-       - name: "Curl test"
-         run: curl localhost:54541/AdminToken/GenerateFirstToken/
-
        - name: Publish on Docker hub
          run: |
            echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
-           docker push restbase/restbase-server-dev:$(cat VERSION)
+           docker push restbase/restbase-server:$(cat VERSION)
