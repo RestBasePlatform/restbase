@@ -31,8 +31,9 @@ jobs:
 
        - name: "Start container"
          run: docker run --network="host" --name test_restbase -p 54541:54541 -d restbase/restbase-server-dev:$(cat VERSION)
-       - name: "Logs test"
-         run: docker logs test_restbase
+
+       - name: "Curl test"
+         run: curl localhost:54541/AdminToken/GenerateFirstToken/
 
        - name: Publish on Docker hub
          run: |
