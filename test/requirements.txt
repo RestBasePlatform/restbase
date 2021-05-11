@@ -1,0 +1,3 @@
+pytest
+SQLAlchemy==1.3.22
+psycopg2-binary

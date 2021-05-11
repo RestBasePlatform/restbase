@@ -8,29 +8,44 @@ on:
 
 jobs:
 
-   Dockerhub:
+   Tests:
      runs-on: ubuntu-latest
-
-     services:
-       postgres:
-         image: postgres
-         env:
-           POSTGRES_PASSWORD: password
-           POSTGRES_HOST_AUTH_METHOD: trust
-         options: >-
-           --health-cmd pg_isready
-           --health-interval 10s
-           --health-timeout 5s
-           --health-retries 5
-
+     strategy:
+       fail-fast: false
+       max-parallel: 4
+       matrix:
+         postgres_image: ["postgres:12", "postgres:11", "postgres:10", "postgres:latest"]
      steps:
        - uses: actions/checkout@v2
 
        - name: "Build image"
          run: docker build -t restbase/restbase-server-dev:$(cat VERSION) .
 
+       - name: "Prepare infrastructure"
+         run: |
+           docker network create -d bridge restbase_network
+           docker run --name internal_postgres -e POSTGRES_PASSWORD=password --network="restbase_network" -d -p 5432:5432 ${{ matrix.postgres_image }}
+
        - name: "Start container"
-         run: docker run --network="host" --name test_restbase -p 54541:54541 -d restbase/restbase-server-dev:$(cat VERSION)
+         run: docker run --network="restbase_network" --name test_restbase -p 54541:54541 -e TEST='test' -d restbase/restbase-server-dev:$(cat VERSION)
+
+       - name: "Install requirements for tests"
+         run: pip3 install -r test/requirements.txt
+
+       - name: "Check logs"
+         run: docker logs test_restbase
+
+       - name: "Tests"
+         run: pytest -v test/
+
+
+   Dockerhub:
+     runs-on: ubuntu-latest
+     needs: Tests
+     steps:
+       - uses: actions/checkout@v2
+       - name: "Build image"
+         run: docker build -t restbase/restbase-server-dev:$(cat VERSION) .
 
        - name: Publish on Docker hub
          run: |

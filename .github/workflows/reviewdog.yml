@@ -1,13 +1,13 @@
 name: reviewdog
 on: [pull_request]
 jobs:
-  pyflakes:
+  flake8:
     name: runner / pyflakes
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: pyflakes
-        uses: reviewdog/action-pyflakes@master
+      - name: flake8
+        uses: reviewdog/action-flake8@v3
         with:
           github_token: ${{ secrets.CODESTYLE_TOKEN }}
           reporter: github-pr-check

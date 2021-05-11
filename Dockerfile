@@ -4,9 +4,8 @@ COPY . /app
 WORKDIR /app/source
 
 EXPOSE 54541
-EXPOSE 5432
 
-ENV internal_db_ip=localhost
+ENV internal_db_ip=internal_postgres
 ENV internal_db_user=postgres
 ENV internal_db_password=password
 ENV internal_db_database_name=postgres
