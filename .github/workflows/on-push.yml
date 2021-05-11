@@ -8,6 +8,14 @@ jobs:
      runs-on: ubuntu-latest
 
      steps:
-       - uses: actions/checkout@v2
-       - name: "tests"
-         run: cd tests && bash localtest.sh
+       - name: "Export version"
+         run: export RELEASE_VERSION=$(cat VERSION)
+
+       - name: Publish Docker to Docker Hub
+         uses: elgohr/Publish-Docker-Github-Action@master
+         with:
+           name: catalystteam/catalyst
+           username: ${{ secrets.DOCKER_USERNAME }}
+           password: ${{ secrets.DOCKER_PASSWORD }}
+           dockerfile: Dockerfile
+           tags: "${{ env.RELEASE_VERSION }}"
