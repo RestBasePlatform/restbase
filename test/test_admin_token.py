@@ -26,6 +26,7 @@ def test_generate_admin_token_correct_header(
         headers={"token": test_main_admin_token},
         data=json.dumps(data_dict),
     )
+    print(response.text)
     assert response.status_code == expected_status_code
     new_token = response.text
 
