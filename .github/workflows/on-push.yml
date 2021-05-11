@@ -1,9 +1,10 @@
 name: Push image to DockerHub
-on: push
-#branches:
-#  - develop
-#  - RB-*
-#  - fastapi
+on:
+  push:
+    branches:
+      - develop
+      - RB-*
+      - fastapi
 
 jobs:
 
