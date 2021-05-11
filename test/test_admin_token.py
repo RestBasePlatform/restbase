@@ -11,7 +11,7 @@ from utils import get_existing_data
     "data_dict,expected_status_code",
     [
         ({"token_name": "test_token"}, 200),
-        ({"token_name": "test_token", "description": "test_description"}, 200)
+        ({"token_name": "test_token", "description": "test_description"}, 200),
     ],
 )
 def test_generate_admin_token_correct_header(
@@ -47,7 +47,7 @@ def test_generate_admin_token_correct_header(
     "data_dict,expected_status_code",
     [
         ({"token_name": "test_token"}, 403),
-        ({"token_name": "test_token", "description": "test_description"}, 403)
+        ({"token_name": "test_token", "description": "test_description"}, 403),
     ],
 )
 def test_generate_admin_token_incorrect_header(
