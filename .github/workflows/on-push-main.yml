@@ -1,0 +1,36 @@
+name: Push image to DockerHub
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+   Dockerhub:
+     runs-on: ubuntu-latest
+
+     services:
+       postgres:
+         image: postgres
+         env:
+           POSTGRES_PASSWORD: password
+           POSTGRES_HOST_AUTH_METHOD: trust
+         options: >-
+           --health-cmd pg_isready
+           --health-interval 10s
+           --health-timeout 5s
+           --health-retries 5
+
+     steps:
+       - uses: actions/checkout@v2
+
+       - name: "Build image"
+         run: docker build -t restbase/restbase-server:$(cat VERSION) .
+
+       - name: "Start container"
+         run: docker run --network="host" --name test_restbase -p 54541:54541 -d restbase/restbase-server-dev:$(cat VERSION)
+
+       - name: Publish on Docker hub
+         run: |
+           echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+           docker push restbase/restbase-server:$(cat VERSION)
