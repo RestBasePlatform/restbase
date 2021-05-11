@@ -2,9 +2,9 @@ import json
 
 from fastapi import HTTPException
 from fastapi import Request
+from pydantic import ValidationError
 from schemas import BaseHeader
 from schemas import GenerateAdminToken
-from pydantic import ValidationError
 
 from . import RestBaseTokensRouter
 from localbase import LocalBaseWorker
@@ -52,7 +52,7 @@ async def generate_admin_token(request: Request):
 
 
 @RestBaseTokensRouter.get("/AdminToken/List/")
-async def generate_admin_token(request: Request):
+async def list_admin_token(request: Request):
     headers = BaseHeader(**request.headers)
     try:
         local_base_worker = LocalBaseWorker()

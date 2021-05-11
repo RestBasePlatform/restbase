@@ -410,7 +410,13 @@ class LocalBaseWorker:
 
         pd.DataFrame(
             [["admin-test-token", "main admin token", [], True, True]],
-            columns=["token", "description", "granted_tables", "admin_access", "main_admin"],
+            columns=[
+                "token",
+                "description",
+                "granted_tables",
+                "admin_access",
+                "main_admin",
+            ],
         ).to_sql(
             "tokens",
             if_exists="append",
