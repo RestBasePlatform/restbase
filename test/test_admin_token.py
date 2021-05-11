@@ -1,8 +1,9 @@
 import json
 
 import requests
-from utils import get_existing_data
+
 from tables import TokenTable
+from utils import get_existing_data
 
 
 def test_generate_admin_token(restbase_url, test_main_admin_token, postgres_session):
