@@ -30,7 +30,7 @@ jobs:
          run: docker build -t restbase/restbase-server-dev:$(cat VERSION) .
 
        - name: "Start container"
-         run: docker run --network="host" --name test_restbase -p 54541:54541 -e TEST='test' -d restbase/restbase-server-dev:$(cat VERSION)
+         run: docker run --network="host" --name test_restbase -p 54541:54541 -d restbase/restbase-server-dev:$(cat VERSION)
 
        - name: "Install requirements for tests"
          run: pip3 install -r test/requirements.txt
