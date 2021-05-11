@@ -30,7 +30,9 @@ jobs:
          run: docker build -t restbase/restbase-server-dev:$(cat VERSION) .
 
        - name: "Start container"
-         run: docker run --name test_restbase -p 54541:54541 -d restbase/restbase-server-dev:$(cat VERSION)
+         run: docker run --network="host" --name test_restbase -p 54541:54541 -d restbase/restbase-server-dev:$(cat VERSION)
+       - name: "Logs test"
+         run: docker logs test_restbase
 
        - name: Publish on Docker hub
          run: |
