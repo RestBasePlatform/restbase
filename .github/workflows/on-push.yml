@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-   Dockerhub Job:
+   Dockerhub:
      runs-on: ubuntu-latest
 
      steps:
