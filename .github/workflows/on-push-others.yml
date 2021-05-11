@@ -11,18 +11,6 @@ jobs:
    Dockerhub:
      runs-on: ubuntu-latest
 
-     services:
-       postgres:
-         image: postgres
-         env:
-           POSTGRES_PASSWORD: password
-           POSTGRES_HOST_AUTH_METHOD: trust
-         options: >-
-           --health-cmd pg_isready
-           --health-interval 10s
-           --health-timeout 5s
-           --health-retries 5
-
      steps:
        - uses: actions/checkout@v2
 
@@ -36,7 +24,7 @@ jobs:
 
 
        - name: "Start container"
-         run: docker run --network="restbase_network" --name test_restbase -p 54541:54541 -d restbase/restbase-server-dev:$(cat VERSION)
+         run: docker run --network="restbase_network" --name test_restbase -p 54541:54541 -e TEST='test' -d restbase/restbase-server-dev:$(cat VERSION)
 
        - name: "Install requirements for tests"
          run: pip3 install -r test/requirements.txt
