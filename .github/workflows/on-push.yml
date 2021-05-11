@@ -32,7 +32,7 @@ jobs:
        - name: "Start container"
          run: docker run -p 54541:54541 -d test_restbase
 
-       - name: "Cul test"
+       - name: "Curl test"
          run: "curl localhost:54541/AdminToken/GenerateFirstToken/"
 
        - name: "Export version"
