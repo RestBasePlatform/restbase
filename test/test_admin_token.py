@@ -38,7 +38,7 @@ def test_generate_admin_token_correct_header(
     # Check new token exists in database
     assert new_token in [i.token for i in tokens if i.admin_access]
     if data_dict.get('description'):
-        pass
+        assert data_dict.get('description') in [i.description for i in tokens if i.token == new_token]
 
 
 @pytest.mark.parametrize(
