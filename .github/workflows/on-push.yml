@@ -27,15 +27,12 @@ jobs:
        - uses: actions/checkout@v2
 
        - name: "Build image"
-         run: docker build -t restabse/serstbase-server-dev .
+         run: docker build -t restabse/serstbase-server-dev$(cat VERSION) .
 
        - name: "Start container"
          run: docker run --name test_restbase -p 54541:54541 -d restabse/serstbase-server-dev
 
-#       - name: "Curl test"
-#         run: "curl localhost:54541/AdminToken/GenerateFirstToken/"
-
        - name: Publish on Docker hub
          run: |
            echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
-           docker push $(cat VERSION)
+           docker push restabse/serstbase-server-dev$(cat VERSION)
