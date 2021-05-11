@@ -42,5 +42,5 @@ jobs:
 
        - name: Publish on Docker hub
            run: |
-             echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username $(cat DOCKER_USERNAME) --password-stdin
+             echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_PASSWORD }} --password-stdin
              docker push $(cat VERSION)
