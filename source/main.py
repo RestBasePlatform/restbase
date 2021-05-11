@@ -6,12 +6,13 @@ from localbase import LocalBaseWorker
 
 from utils import run_migrations
 
-if os.getenv('TEST'):
-    LocalBaseWorker.add_test_token()
-
 app = fa.FastAPI()
 
 
 run_migrations()
+
+
+if os.getenv('TEST'):
+    LocalBaseWorker.add_test_token()
 
 app.include_router(RestBaseTokensRouter)
