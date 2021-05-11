@@ -10,4 +10,4 @@ jobs:
         uses: reviewdog/action-pyflakes@master
         with:
           github_token: ${{ secrets.CODESTYLE_TOKEN }}
-          reporter: restbase-dev
+          reporter: github-pr-check
