@@ -3,6 +3,9 @@ import json
 from fastapi import HTTPException
 from fastapi import Request
 from fastapi import Response
+from fastapi import status
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 from schemas import BaseHeader
 from schemas import GenerateAdminToken
@@ -45,8 +48,11 @@ async def generate_admin_token(request: Request):
         )
         return Response(content=admin_token)
     except Exception as e:
-        if isinstance(e, HTTPException) or isinstance(e, ValidationError):
-            raise
+        if isinstance(e, ValidationError):
+            JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content=jsonable_encoder({"detail": e.errors()}),
+            )
         raise HTTPException(
             status_code=502, detail={"status": "Error", "message": str(e)}
         )
