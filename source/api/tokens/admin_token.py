@@ -13,6 +13,7 @@ from schemas import GenerateAdminToken
 from . import RestBaseTokensRouter
 from localbase import LocalBaseWorker
 from token_worker import TokenWorker
+from utils import validator
 
 
 @RestBaseTokensRouter.get("/AdminToken/GenerateFirstToken/")
@@ -28,13 +29,14 @@ async def generate_main_admin_token():
         )
 
 
+@validator
 @RestBaseTokensRouter.post("/AdminToken/Generate/")
-async def generate_admin_token(request: Request):
+async def generate_admin_token(request: Request, header_validator=BaseHeader, body_validator=GenerateAdminToken):
     try:
-        headers = BaseHeader(**request.headers)
-        body = GenerateAdminToken(**json.loads(await request.body()))
+        headers = request.headers
+        body = json.loads(await request.body())
         local_base_worker = LocalBaseWorker()
-        if headers.token not in [
+        if headers.get('token', '') not in [
             i.token for i in local_base_worker.get_main_admin_tokens_objects_list()
         ]:
             raise HTTPException(
@@ -43,16 +45,11 @@ async def generate_admin_token(request: Request):
             )
         token_worker = TokenWorker(local_base_worker)
         admin_token = token_worker.add_admin_token(
-            body.token_name,
-            body.description,
+            body.get('token_name'),
+            body.get('description'),
         )
         return Response(content=admin_token)
     except Exception as e:
-        if isinstance(e, ValidationError):
-            JSONResponse(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                content=jsonable_encoder({"detail": e.errors()}),
-            )
         raise HTTPException(
             status_code=502, detail={"status": "Error", "message": str(e)}
         )

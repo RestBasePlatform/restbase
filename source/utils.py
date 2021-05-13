@@ -1,8 +1,16 @@
 import os
 import typing
+import json
+
+from functools import wraps
+from fastapi import status
 
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+
+from pydantic import ValidationError
 
 
 def run_migrations():
@@ -63,5 +71,23 @@ def get_existing_data(
     return [getattr(i, target_attr) for i in data] if target_attr else data
 
 
-def validate_request():
-    pass
+def validator(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        try:
+            request = args[0]
+            kwargs.get('header_validator')(**request.headers)
+            kwargs.get('header_validator')(**json.loads(await request.body()))
+        except Exception as e:
+            if isinstance(e, ValidationError):
+                JSONResponse(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    content=jsonable_encoder({"detail": e.errors()}),
+                )
+            else:
+                JSONResponse(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    content=jsonable_encoder({"detail": str(e)}),
+                )
+        return await func(*args, **kwargs)
+    return wrapper
