@@ -22,10 +22,11 @@ jobs:
        - name: "Prepare infrastructure"
          run: |
            cd test/
+           docker network create restbase_test_network
            docker-compose up -d
 
        - name: "Start container"
-         run: docker run --network="test_restbase_test_network" --name test_restbase -p 54541:54541 -e TEST='test' -d restbase/restbase-server-dev:$(cat VERSION)
+         run: docker run --network="restbase_test_network" --name test_restbase -p 54541:54541 -e TEST='test' -d restbase/restbase-server-dev:$(cat VERSION)
 
        - name: "Install requirements for tests"
          run: pip3 install -r test/requirements.txt
