@@ -13,7 +13,7 @@ services:
     ports:
     - "5432:5432"
     networks:
-      restbase_test_network
+       - restbase_test_network
 
 networks:
   restbase_test_network:
