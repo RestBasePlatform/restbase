@@ -10,15 +10,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    ports:
+    - "5432:5432"
     networks:
-      restbase_test_network:
-        ipv4_address: "10.5.0.5"
+      restbase_test_network
 
 networks:
   restbase_test_network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 10.5.0.0/27
-          gateway: 10.5.0.1
     external: true
