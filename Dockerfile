@@ -5,7 +5,7 @@ WORKDIR /app/source
 
 EXPOSE 54541
 
-ENV internal_db_ip=internal_postgres
+ENV internal_db_ip=10.5.0.5
 ENV internal_db_user=postgres
 ENV internal_db_password=password
 ENV internal_db_database_name=postgres
