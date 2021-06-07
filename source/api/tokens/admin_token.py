@@ -1,19 +1,12 @@
-import json
+import traceback
 
 from fastapi import HTTPException
-from fastapi import Request
-from fastapi import Response
-from fastapi import status
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
-from pydantic import ValidationError
-from schemas import BaseHeader
+from fastapi import Header
 from schemas import GenerateAdminToken
 
 from . import RestBaseTokensRouter
 from localbase import LocalBaseWorker
 from token_worker import TokenWorker
-from utils import validator
 
 
 @RestBaseTokensRouter.get("/AdminToken/GenerateFirstToken/")
@@ -29,14 +22,11 @@ async def generate_main_admin_token():
         )
 
 
-@validator
 @RestBaseTokensRouter.post("/AdminToken/Generate/")
-async def generate_admin_token(request: Request, header_validator=BaseHeader, body_validator=GenerateAdminToken):
+async def generate_admin_token(body: GenerateAdminToken, token: str = Header(None)):
     try:
-        headers = request.headers
-        body = json.loads(await request.body())
         local_base_worker = LocalBaseWorker()
-        if headers.get('token', '') not in [
+        if token not in [
             i.token for i in local_base_worker.get_main_admin_tokens_objects_list()
         ]:
             raise HTTPException(
@@ -45,23 +35,25 @@ async def generate_admin_token(request: Request, header_validator=BaseHeader, bo
             )
         token_worker = TokenWorker(local_base_worker)
         admin_token = token_worker.add_admin_token(
-            body.get('token_name'),
-            body.get('description'),
+            body.token_name,
+            body.description,
         )
-        return Response(content=admin_token)
+        return {
+            "new_token": admin_token,
+            "token_name": body.token_name
+        }
+
     except Exception as e:
         raise HTTPException(
-            status_code=502, detail={"status": "Error", "message": str(e)}
+            status_code=502, detail={"status": "Error", "message": str(traceback.format_exc())}
         )
 
 
 @RestBaseTokensRouter.get("/AdminToken/List/")
-async def list_admin_token(request: Request):
-    headers = BaseHeader(**request.headers)
+async def list_admin_token(token: str = Header(None)):
     try:
         local_base_worker = LocalBaseWorker()
-        print(local_base_worker.get_main_admin_tokens_objects_list())
-        if headers.token not in [
+        if token not in [
             i.token for i in local_base_worker.get_main_admin_tokens_objects_list()
         ]:
             raise HTTPException(
