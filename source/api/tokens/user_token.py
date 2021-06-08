@@ -4,11 +4,12 @@ from fastapi import Header
 from fastapi import HTTPException
 from schemas import DeleteUserToken
 from schemas import GenerateUserToken
-from utils import make_response, validate_admin_access
 
 from . import RestBaseTokensRouter
 from localbase import LocalBaseWorker
 from token_worker import TokenWorker
+from utils import make_response
+from utils import validate_admin_access
 
 
 @RestBaseTokensRouter.post("/UserToken/Generate/")
@@ -27,7 +28,9 @@ async def generate_user_token(body: GenerateUserToken, token: str = Header(None)
             token=body.token,
             access_tables=body.access_tables,
         )
-        return make_response(0, {"new_token": user_token, "token_name": body.token_name})
+        return make_response(
+            0, {"new_token": user_token, "token_name": body.token_name}
+        )
     except Exception as e:
         if not isinstance(e, HTTPException):
             raise HTTPException(
@@ -46,9 +49,12 @@ async def list_user_tokens(token: str = Header(None)):
                 detail={"status": "Error", "message": "Permission denied"},
             )
         user_tokens = local_base_worker.get_user_tokens_objects_list()
-        return make_response(0, {
-            "tokens": [i.prepare_for_return() for i in user_tokens],
-        })
+        return make_response(
+            0,
+            {
+                "tokens": [i.prepare_for_return() for i in user_tokens],
+            },
+        )
     except Exception as e:
         if not isinstance(e, HTTPException):
             raise HTTPException(

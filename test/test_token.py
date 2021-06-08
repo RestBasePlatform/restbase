@@ -27,7 +27,7 @@ def test_generate_admin_token_correct_header(
         data=json.dumps(data_dict),
     )
     assert response.status_code == expected_status_code
-    new_token = json.loads(response.text)['new_token']
+    new_token = json.loads(response.text)["new_token"]
 
     tokens = get_existing_data(
         postgres_session,
@@ -82,7 +82,7 @@ def test_generate_user_token_correct_header(
         data=json.dumps(data_dict),
     )
     assert response.status_code == expected_status_code
-    new_token = json.loads(response.text)['new_token']
+    new_token = json.loads(response.text)["new_token"]
 
     tokens = get_existing_data(
         postgres_session,
