@@ -37,10 +37,7 @@ async def generate_user_token(body: GenerateUserToken, token: str = Header(None)
             raise HTTPException(
                 status_code=502, detail={"status": "Error", "message": str(e)}
             )
-        raise HTTPException(
-            status_code=502,
-            detail={"status": "Error", "message": str(traceback.format_exc())},
-        )
+        raise
 
 
 @RestBaseTokensRouter.get("/UserToken/List/")
@@ -63,15 +60,11 @@ async def list_user_tokens(token: str = Header(None)):
             "tokens": [i.prepare_for_return() for i in user_tokens],
         }
     except Exception as e:
-        print(e)
         if not isinstance(e, HTTPException):
             raise HTTPException(
                 status_code=502, detail={"status": "Error", "message": str(e)}
             )
-        raise HTTPException(
-            status_code=502,
-            detail={"status": "Error", "message": str(traceback.format_exc())},
-        )
+        raise
 
 
 @RestBaseTokensRouter.delete("/UserToken/Delete/")
@@ -93,12 +86,8 @@ async def remove_user_tokens(body: DeleteUserToken, token: str = Header(None)):
             "status": "success",
         }
     except Exception as e:
-        print(e)
         if not isinstance(e, HTTPException):
             raise HTTPException(
                 status_code=502, detail={"status": "Error", "message": str(e)}
             )
-        raise HTTPException(
-            status_code=502,
-            detail={"status": "Error", "message": str(traceback.format_exc())},
-        )
+        raise

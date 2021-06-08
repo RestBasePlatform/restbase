@@ -42,10 +42,11 @@ async def generate_admin_token(body: GenerateAdminToken, token: str = Header(Non
         return {"new_token": admin_token, "token_name": body.token_name}
 
     except Exception as e:  # noqa: F841
-        raise HTTPException(
-            status_code=502,
-            detail={"status": "Error", "message": str(traceback.format_exc())},
-        )
+        if not isinstance(e, HTTPException):
+            raise HTTPException(
+                status_code=502, detail={"status": "Error", "message": str(e)}
+            )
+        raise
 
 
 @RestBaseTokensRouter.get("/AdminToken/List/")
@@ -88,12 +89,8 @@ async def remove_amin_tokens(body: DeleteUserToken, token: str = Header(None)):
             "status": "success",
         }
     except Exception as e:
-        print(e)
         if not isinstance(e, HTTPException):
             raise HTTPException(
                 status_code=502, detail={"status": "Error", "message": str(e)}
             )
-        raise HTTPException(
-            status_code=502,
-            detail={"status": "Error", "message": str(traceback.format_exc())},
-        )
+        raise
