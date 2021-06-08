@@ -222,12 +222,12 @@ class LocalBaseWorker:
             if not i.admin_access
         ]
 
-    def get_admin_tokens_objects_list(self) -> List[TokenTable]:
+    def get_admin_tokens_objects_list(self, with_main_admin: bool = False) -> List[TokenTable]:
         # Returns only tokens with admin access
         return [
             i
             for i in get_existing_data(self.db_session, TokenTable)
-            if i.admin_access and not i.main_admin
+            if i.admin_access and i.main_admin == with_main_admin
         ]
 
     def get_main_admin_tokens_objects_list(self) -> List[TokenTable]:

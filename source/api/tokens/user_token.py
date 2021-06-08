@@ -39,3 +39,30 @@ async def generate_user_token(body: GenerateUserToken, token: str = Header(None)
         raise HTTPException(
             status_code=502, detail={"status": "Error", "message": str(traceback.format_exc())}
         )
+
+
+@RestBaseTokensRouter.get("/UserToken/List/")
+async def list_user_tokens(token: str = Header(None)):
+    try:
+        local_base_worker = LocalBaseWorker()
+        if token not in [
+            i.token for i in local_base_worker.get_admin_tokens_objects_list(with_main_admin=True)
+        ]:
+            raise HTTPException(
+                status_code=403,
+                detail={"status": "Error", "message": "Permission denied"},
+            )
+        user_tokens = local_base_worker.get_user_tokens_objects_list()
+        print(user_tokens)
+        return {
+            "tokens": [i.prepare_for_return() for i in user_tokens],
+        }
+    except Exception as e:
+        print(e)
+        if not isinstance(e, HTTPException):
+            raise HTTPException(
+                status_code=502, detail={"status": "Error", "message": str(e)}
+            )
+        raise HTTPException(
+            status_code=502, detail={"status": "Error", "message": str(traceback.format_exc())}
+        )
