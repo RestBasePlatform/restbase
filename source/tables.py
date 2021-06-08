@@ -28,7 +28,7 @@ class TokenTable(Base):
             "description": self.description,
             "granted_tables": self.granted_tables,
             "admin_access": self.admin_access,
-            "create_date": self.create_date,
+            "create_date": self.create_date.strftime("%Y-%m-%d %H-%M-%S"),
         }
 
 

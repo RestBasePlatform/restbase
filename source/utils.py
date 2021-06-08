@@ -1,12 +1,7 @@
-import json
 import os
 import typing
-from functools import wraps
 
-from fastapi import status
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from pydantic import ValidationError
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 
@@ -69,24 +64,26 @@ def get_existing_data(
     return [getattr(i, target_attr) for i in data] if target_attr else data
 
 
-def validator(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        try:
-            request = args[0]
-            kwargs.get("header_validator")(**request.headers)
-            kwargs.get("header_validator")(**json.loads(await request.body()))
-        except Exception as e:
-            if isinstance(e, ValidationError):
-                JSONResponse(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    content=jsonable_encoder({"detail": e.errors()}),
-                )
-            else:
-                JSONResponse(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    content=jsonable_encoder({"detail": str(e)}),
-                )
-        return await func(*args, **kwargs)
+def make_response(status_code: int, data: dict):
+    statuses = {"0": "Success", "1": "Processed error", "2": "Unexpected error"}
 
-    return wrapper
+    response_data = {**{"Status": statuses[str(status_code)]}, **data}
+    return JSONResponse(response_data)
+
+
+def validate_admin_access(
+    token, local_worker, token_object_getter: str = "get_admin_tokens_objects_list"
+) -> bool:
+    """
+    token_object_getter - function to call for token objects list
+    Return ture if token has admin access, else false
+    """
+    # we need kwargs because get_admin_tokens_objects_list and get_main_admin_tokens_objects_list has different args
+    kwargs = (
+        {"with_main_admin": True}
+        if token_object_getter == "get_admin_tokens_objects_list"
+        else {}
+    )
+    return token in [
+        i.token for i in getattr(local_worker, token_object_getter)(**kwargs)
+    ]
