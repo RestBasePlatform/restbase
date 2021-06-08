@@ -90,9 +90,11 @@ def validate_admin_access(token, local_worker, token_object_getter: str = "get_a
     token_object_getter - function to call for token objects list
     Return ture if token has admin access, else false
     """
+    # we need kwargs because get_admin_tokens_objects_list and get_main_admin_tokens_objects_list has different args
+    kwargs = {"with_main_admin": True} if token_object_getter == 'get_admin_tokens_objects_list' else {}
     return token in [
         i.token
         for i in getattr(local_worker, token_object_getter)(
-            with_main_admin=True
+            **kwargs
         )
     ]
