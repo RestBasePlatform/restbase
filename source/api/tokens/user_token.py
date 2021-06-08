@@ -1,5 +1,3 @@
-import traceback
-
 from fastapi import Header
 from fastapi import HTTPException
 from schemas import DeleteUserToken
