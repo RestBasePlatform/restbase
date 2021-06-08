@@ -1,7 +1,8 @@
 import traceback
 
-from fastapi import HTTPException
 from fastapi import Header
+from fastapi import HTTPException
+from schemas import DeleteUserToken
 from schemas import GenerateAdminToken
 
 from . import RestBaseTokensRouter
@@ -38,14 +39,12 @@ async def generate_admin_token(body: GenerateAdminToken, token: str = Header(Non
             body.token_name,
             body.description,
         )
-        return {
-            "new_token": admin_token,
-            "token_name": body.token_name
-        }
+        return {"new_token": admin_token, "token_name": body.token_name}
 
-    except Exception as e:
+    except Exception as e:  # noqa: F841
         raise HTTPException(
-            status_code=502, detail={"status": "Error", "message": str(traceback.format_exc())}
+            status_code=502,
+            detail={"status": "Error", "message": str(traceback.format_exc())},
         )
 
 
@@ -68,3 +67,33 @@ async def list_admin_token(token: str = Header(None)):
                 status_code=502, detail={"status": "Error", "message": str(e)}
             )
         raise
+
+
+@RestBaseTokensRouter.delete("/UserToken/Delete/")
+async def remove_amin_tokens(body: DeleteUserToken, token: str = Header(None)):
+    try:
+        local_base_worker = LocalBaseWorker()
+        if token not in [
+            i.token
+            for i in local_base_worker.get_admin_tokens_objects_list(
+                with_main_admin=True
+            )
+        ]:
+            raise HTTPException(
+                status_code=403,
+                detail={"status": "Error", "message": "Permission denied"},
+            )
+        local_base_worker.remove_token(body.token_name)
+        return {
+            "status": "success",
+        }
+    except Exception as e:
+        print(e)
+        if not isinstance(e, HTTPException):
+            raise HTTPException(
+                status_code=502, detail={"status": "Error", "message": str(e)}
+            )
+        raise HTTPException(
+            status_code=502,
+            detail={"status": "Error", "message": str(traceback.format_exc())},
+        )

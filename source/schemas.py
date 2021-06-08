@@ -1,6 +1,6 @@
-from pydantic import BaseModel
 from typing import List
-from typing import Optional
+
+from pydantic import BaseModel
 
 
 class BaseHeader(BaseModel):
@@ -15,3 +15,7 @@ class GenerateAdminToken(BaseModel):
 class GenerateUserToken(GenerateAdminToken):
     token: str = None
     access_tables: List[str] = ()
+
+
+class DeleteUserToken(BaseModel):
+    token_name: str

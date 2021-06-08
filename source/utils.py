@@ -1,16 +1,14 @@
+import json
 import os
 import typing
-import json
-
 from functools import wraps
-from fastapi import status
 
-from sqlalchemy import create_engine
-from sqlalchemy.exc import OperationalError
+from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-
 from pydantic import ValidationError
+from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
 
 
 def run_migrations():
@@ -76,8 +74,8 @@ def validator(func):
     async def wrapper(*args, **kwargs):
         try:
             request = args[0]
-            kwargs.get('header_validator')(**request.headers)
-            kwargs.get('header_validator')(**json.loads(await request.body()))
+            kwargs.get("header_validator")(**request.headers)
+            kwargs.get("header_validator")(**json.loads(await request.body()))
         except Exception as e:
             if isinstance(e, ValidationError):
                 JSONResponse(
@@ -90,4 +88,5 @@ def validator(func):
                     content=jsonable_encoder({"detail": str(e)}),
                 )
         return await func(*args, **kwargs)
+
     return wrapper

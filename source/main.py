@@ -16,5 +16,3 @@ if os.getenv("TEST"):
     LocalBaseWorker.add_test_token()
 
 app.include_router(RestBaseTokensRouter)
-
-

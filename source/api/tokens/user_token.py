@@ -1,7 +1,8 @@
 import traceback
 
-from fastapi import HTTPException
 from fastapi import Header
+from fastapi import HTTPException
+from schemas import DeleteUserToken
 from schemas import GenerateUserToken
 
 from . import RestBaseTokensRouter
@@ -14,7 +15,10 @@ async def generate_user_token(body: GenerateUserToken, token: str = Header(None)
     try:
         local_base_worker = LocalBaseWorker()
         if token not in [
-            i.token for i in local_base_worker.get_admin_tokens_objects_list()
+            i.token
+            for i in local_base_worker.get_admin_tokens_objects_list(
+                with_main_admin=True
+            )
         ]:
             raise HTTPException(
                 status_code=403,
@@ -25,19 +29,17 @@ async def generate_user_token(body: GenerateUserToken, token: str = Header(None)
             body.token_name,
             body.description,
             token=body.token,
-            access_tables=body.access_tables
+            access_tables=body.access_tables,
         )
-        return {
-            "new_token": user_token,
-            "token_name": body.token_name
-        }
+        return {"new_token": user_token, "token_name": body.token_name}
     except Exception as e:
         if not isinstance(e, HTTPException):
             raise HTTPException(
                 status_code=502, detail={"status": "Error", "message": str(e)}
             )
         raise HTTPException(
-            status_code=502, detail={"status": "Error", "message": str(traceback.format_exc())}
+            status_code=502,
+            detail={"status": "Error", "message": str(traceback.format_exc())},
         )
 
 
@@ -46,7 +48,10 @@ async def list_user_tokens(token: str = Header(None)):
     try:
         local_base_worker = LocalBaseWorker()
         if token not in [
-            i.token for i in local_base_worker.get_admin_tokens_objects_list(with_main_admin=True)
+            i.token
+            for i in local_base_worker.get_admin_tokens_objects_list(
+                with_main_admin=True
+            )
         ]:
             raise HTTPException(
                 status_code=403,
@@ -64,5 +69,36 @@ async def list_user_tokens(token: str = Header(None)):
                 status_code=502, detail={"status": "Error", "message": str(e)}
             )
         raise HTTPException(
-            status_code=502, detail={"status": "Error", "message": str(traceback.format_exc())}
+            status_code=502,
+            detail={"status": "Error", "message": str(traceback.format_exc())},
+        )
+
+
+@RestBaseTokensRouter.delete("/UserToken/Delete/")
+async def remove_user_tokens(body: DeleteUserToken, token: str = Header(None)):
+    try:
+        local_base_worker = LocalBaseWorker()
+        if token not in [
+            i.token
+            for i in local_base_worker.get_admin_tokens_objects_list(
+                with_main_admin=True
+            )
+        ]:
+            raise HTTPException(
+                status_code=403,
+                detail={"status": "Error", "message": "Permission denied"},
+            )
+        local_base_worker.remove_token(body.token_name)
+        return {
+            "status": "success",
+        }
+    except Exception as e:
+        print(e)
+        if not isinstance(e, HTTPException):
+            raise HTTPException(
+                status_code=502, detail={"status": "Error", "message": str(e)}
+            )
+        raise HTTPException(
+            status_code=502,
+            detail={"status": "Error", "message": str(traceback.format_exc())},
         )

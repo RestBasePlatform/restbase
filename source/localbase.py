@@ -92,6 +92,12 @@ class LocalBaseWorker:
             )
             self._commit()
 
+    def remove_token(self, token_name):
+        # Don't execute in local database when local_name is False
+        # In Database/Put except block we pass none
+        self.execute_database_action(TokenTable, action="delete", name=token_name)
+        self._commit()
+
     def get_database_and_connection(self, local_base_name: str):
         database_obj = self.execute_database_action(
             BasesTable, "first", local_name=local_base_name
@@ -222,7 +228,9 @@ class LocalBaseWorker:
             if not i.admin_access
         ]
 
-    def get_admin_tokens_objects_list(self, with_main_admin: bool = False) -> List[TokenTable]:
+    def get_admin_tokens_objects_list(
+        self, with_main_admin: bool = False
+    ) -> List[TokenTable]:
         # Returns only tokens with admin access
         return [
             i
