@@ -1,4 +1,4 @@
-FROM restbase/base_image:fastapi
+FROM restbase/base_image
 
 COPY . /app
 WORKDIR /app/source

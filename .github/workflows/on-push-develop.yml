@@ -23,7 +23,7 @@ jobs:
          run: |
            docker network create -d bridge restbase_network
            docker run --name internal_postgres -e POSTGRES_PASSWORD=password --network="restbase_network" -d -p 5432:5432 ${{ matrix.postgres_image }}
-           docker run --name test_postgres -e POSTGRES_PASSWORD=password --network="restbase_network" -d -p 5432:5432 ${{ matrix.postgres_image }}
+           docker run --name test_postgres -e POSTGRES_PASSWORD=password --network="restbase_network" -d -p 5433:5432 ${{ matrix.postgres_image }}
            sleep 10
 
        - name: "Start container"
