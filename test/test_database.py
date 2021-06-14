@@ -52,7 +52,7 @@ def test_add_database(
         headers={"token": test_main_admin_token},
         data=json.dumps(data_dict),
     )
-    assert response.text = ''
+    assert response.text == ''
     assert response.status_code == expected_status_code
     local_name = json.loads(response.text)["local_db_name"]
 
