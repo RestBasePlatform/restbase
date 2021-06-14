@@ -15,7 +15,7 @@ from utils import get_existing_data
             {
                 "type": "postgres",
                 "host": "test_postgres",
-                "port": 5432,
+                "port": 5433,
                 "database": "postgres",
                 "username": "postgres",
                 "password": "password",
@@ -28,7 +28,7 @@ from utils import get_existing_data
             {
                 "type": "postgres",
                 "host": "test_postgres",
-                "port": 5432,
+                "port": 5433,
                 "database": "postgres",
                 "username": "postgres",
                 "password": "password",
