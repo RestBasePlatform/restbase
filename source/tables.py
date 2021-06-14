@@ -38,7 +38,7 @@ class BasesTable(Base):
     type = Column(String)
     description = Column(String)
     local_name = Column(String, primary_key=True)
-    ip = Column(String)
+    host = Column(String)
     port = Column(String)
     username = Column(String)
     database = Column(String)

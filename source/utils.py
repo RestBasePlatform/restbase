@@ -40,12 +40,12 @@ def get_db_engine(db_type: str, **con_params):
     if db_type == "postgres":
         return create_engine(
             f"postgresql://{con_params.get('username')}:{con_params.get('password')}@"
-            f"{con_params.get('ip')}:{con_params.get('port')}/{con_params.get('database')}"
+            f"{con_params.get('host')}:{con_params.get('port')}/{con_params.get('database')}"
         )
     elif db_type == "mysql":
         return create_engine(
             f"mysql://{con_params.get('username')}:{con_params.get('password')}@"
-            f"{con_params.get('ip')}:{con_params.get('port')}/{con_params.get('database')}"
+            f"{con_params.get('host')}:{con_params.get('port')}/{con_params.get('database')}"
         )
 
 

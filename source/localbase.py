@@ -66,10 +66,10 @@ class LocalBaseWorker:
         if not local_name:
             local_name = "_".join(
                 [
-                    con_params["ip"],
+                    con_params["host"],
                     con_params["port"],
                     con_params["database"],
-                    con_params["user"],
+                    con_params["username"],
                 ]
             )
         if self._is_db_exists(local_name):
@@ -105,7 +105,7 @@ class LocalBaseWorker:
 
         return database_obj, get_db_engine(
             database_obj.type,
-            ip=database_obj.ip,
+            ip=database_obj.host,
             port=database_obj.port,
             username=database_obj.username,
             database=database_obj.database,
@@ -181,7 +181,7 @@ class LocalBaseWorker:
     def get_database_data(self, local_database_name: str):
         obj = self.get_database_object(local_database_name)
         return {
-            "ip": obj.ip,
+            "ip": obj.host,
             "port": obj.port,
             "username": obj.username,
             "local_name": obj.local_name,
