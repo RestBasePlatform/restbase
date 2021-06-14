@@ -2,6 +2,7 @@ from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
+from sqlalchemy import JSON
 from sqlalchemy import String
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.declarative import declarative_base
@@ -43,6 +44,7 @@ class BasesTable(Base):
     username = Column(String)
     database = Column(String)
     password = Column(String)
+    con_args = Column(JSON)
 
 
 class TablesInfoTable(Base):

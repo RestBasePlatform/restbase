@@ -1,8 +1,8 @@
 import os
 
 import fastapi as fa
-from api import RestBaseTokensRouter
 from api import RestBaseDatabaseRouter
+from api import RestBaseTokensRouter
 
 from localbase import LocalBaseWorker
 from utils import run_migrations

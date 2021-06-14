@@ -105,11 +105,12 @@ class LocalBaseWorker:
 
         return database_obj, get_db_engine(
             database_obj.type,
-            ip=database_obj.host,
+            host=database_obj.host,
             port=database_obj.port,
             username=database_obj.username,
             database=database_obj.database,
             password=database_obj.password,
+            con_args=database_obj.con_args,
         )
 
     def write_table_params(

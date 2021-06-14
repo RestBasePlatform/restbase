@@ -1,5 +1,6 @@
 from typing import List
 from typing import Optional
+from typing import Union
 
 from pydantic import BaseModel
 
@@ -25,9 +26,10 @@ class DeleteUserToken(BaseModel):
 class AddDatabase(BaseModel):
     type: str
     host: str
-    port: str
+    port: Optional[Union[str, int]]
     database: str
     username: str
     password: str
+    connect_args: Optional[dict] = dict()
     local_name: Optional[str] = None
     description: Optional[str] = None

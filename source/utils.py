@@ -5,6 +5,10 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 
+from db_workers import DatabaseWorker
+from db_workers import MySQLWorker
+from db_workers import PostgreWorker
+
 
 def run_migrations():
     """
@@ -30,6 +34,7 @@ def run_migrations():
 
 def database_health_check(engine) -> bool:
     try:
+        print(engine)
         engine.connect()
         return True
     except OperationalError:
@@ -38,9 +43,10 @@ def database_health_check(engine) -> bool:
 
 def get_db_engine(db_type: str, **con_params):
     if db_type == "postgres":
+        print(con_params)
         return create_engine(
             f"postgresql://{con_params.get('username')}:{con_params.get('password')}@"
-            f"{con_params.get('host')}:{con_params.get('port')}/{con_params.get('database')}"
+            f"{con_params.get('host')}:{con_params.get('port')}/{con_params.get('database')}?sslmode={con_params.get('con_args', dict()).get('sslmode', 'disable')}"
         )
     elif db_type == "mysql":
         return create_engine(
@@ -87,3 +93,10 @@ def validate_admin_access(
     return token in [
         i.token for i in getattr(local_worker, token_object_getter)(**kwargs)
     ]
+
+
+def get_worker(db_type: str) -> typing.Type[DatabaseWorker]:  # noqa: TYP006
+    if db_type == "postgres":
+        return PostgreWorker
+    elif db_type == "mysql":
+        return MySQLWorker
