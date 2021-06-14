@@ -44,7 +44,7 @@ jobs:
      steps:
        - uses: actions/checkout@v2
        - name: "Build image"
-         run: docker build -t restbase/restbase-server-dev:$(cat VERSION) .
+         run: docker build -t restbase/restbase-server-dev:${GITHUB_REF##*/} .
 
        - name: Publish on Docker hub
          run: |
