@@ -18,6 +18,7 @@ async def add_database(body: AddDatabase, token: str = Header(None)):
                 status_code=403,
                 detail={"status": "Error", "message": "Permission denied"},
             )
+        print(body)
         db_local_name = local_base_worker.add_database(
             body.type,
             body.description,
