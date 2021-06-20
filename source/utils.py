@@ -44,6 +44,8 @@ def database_health_check(engine) -> bool:
 def get_db_engine(db_type: str, **con_params):
     if db_type == "postgres":
         print(con_params)
+        print(f"postgresql://{con_params.get('username')}:{con_params.get('password')}@"
+            f"{con_params.get('host')}:{con_params.get('port')}/{con_params.get('database')}")
         return create_engine(
             f"postgresql://{con_params.get('username')}:{con_params.get('password')}@"
             f"{con_params.get('host')}:{con_params.get('port')}/{con_params.get('database')}"
