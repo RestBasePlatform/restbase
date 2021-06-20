@@ -46,7 +46,7 @@ def get_db_engine(db_type: str, **con_params):
         print(con_params)
         return create_engine(
             f"postgresql://{con_params.get('username')}:{con_params.get('password')}@"
-            f"{con_params.get('host')}:{con_params.get('port')}/{con_params.get('database')}?sslmode={con_params.get('con_args', dict()).get('sslmode', 'disable')}"
+            f"{con_params.get('host')}:{con_params.get('port')}/{con_params.get('database')}"
         )
     elif db_type == "mysql":
         return create_engine(
