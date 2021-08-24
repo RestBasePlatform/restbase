@@ -134,3 +134,5 @@ dmypy.json
 .vscode/
 
 conf/pg_hba.conf
+source/modules/
+source/controller/modules/

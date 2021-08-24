@@ -4,10 +4,14 @@ on: push
 
 jobs:
 
-   pytest-job:
+   tests-with-pytest:
      runs-on: ubuntu-latest
 
      steps:
        - uses: actions/checkout@v2
-       - name: "tests"
-         run: cd tests && bash localtest.sh
+       - name: "Install Requirements"
+         run: |
+          pip3 install -r requirements.txt
+       - name: "Run tests"
+         run: |
+          pytest -v
