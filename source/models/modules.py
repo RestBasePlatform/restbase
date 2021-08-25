@@ -13,7 +13,7 @@ class InstalledModules(Base):
     module_name = Column(String)
     version = Column(String)
     installation_date = Column(DateTime)
-    functions = Column(JSON)
+    functions_config = Column(JSON)
 
     def to_dict(self):
         return {
