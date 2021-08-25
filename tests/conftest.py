@@ -13,6 +13,10 @@ sys.path.insert(
 from main import app
 
 
+def pytest_sessionstart():
+    os.system("alembic upgrade head")
+
+
 @pytest.fixture(scope="function")
 def test_client():
     if os.path.exists("./modules"):
