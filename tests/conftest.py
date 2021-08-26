@@ -1,58 +1,30 @@
 import os
+import shutil
 import sys
 
 import pytest
-import sqlalchemy
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/")))
-
-from utils import get_existing_data  # noqa: E402
+from fastapi.testclient import TestClient
 
 
-@pytest.fixture
-def tables_data_postgres():
-    return {
-        "table_name": "test_table",
-        "folder_name": "public",
-        "database_name": "test_postgres",
-        "local_name": "test_table",
-        "columns": {"column1": "type1", "column2": "type2"},
-    }
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../source/"))
+)
+
+from main import app
 
 
-@pytest.fixture
-def internal_db_session():
-    main_db_string = "postgresql://postgres:password@api/postgres"
-    return sqlalchemy.create_engine(main_db_string)
+def pytest_sessionstart():
+    os.system("alembic upgrade head")
 
 
-@pytest.fixture
-def postgre_db_data():
-    return {
-        "type": "postgres",
-        "local_database_name": "test-base",
-        "ip": "postgres_test_base",
-        "port": "5432",
-        "database": "postgres",
-        "username": "postgres",
-        "password": "password",
-    }
+@pytest.fixture(scope="function")
+def test_client():
+    if os.path.exists("./modules"):
+        shutil.rmtree("./modules")
+    shutil.copy("./source/database.db", "./database.db")
+    return TestClient(app)
 
 
 @pytest.fixture()
-def mysql_db_data():
-    return {
-        "type": "mysql",
-        "local_database_name": "test-base-mysql",
-        "ip": "mysql_test_base",
-        "port": "3306",
-        "database": "mysql",
-        "username": "root",
-        "password": "password",
-    }
-
-
-class Helpers:
-    @staticmethod
-    def get_column_data_from_table(session, table_object, col_name):
-        return get_existing_data(session, table_object, col_name)
+def test_module_url():
+    return "https://github.com/RestBaseApi/TestModule"
