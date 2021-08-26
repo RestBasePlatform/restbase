@@ -1,7 +1,7 @@
-from sqlalchemy import Column
 from sqlalchemy import ARRAY
-from sqlalchemy import Integer
+from sqlalchemy import Column
 from sqlalchemy import DateTime
+from sqlalchemy import Integer
 from sqlalchemy import JSON
 from sqlalchemy import String
 
@@ -14,7 +14,7 @@ class Users(Base):
     id = Column(Integer, primary_key=True)
     username_secret_id = Column(Integer, nullable=False)
     password_secret_id = Column(Integer, nullable=False)
-    access_config = Column(JSON)
+    access_config = Column(ARRAY(JSON))
     groups = Column(ARRAY(Integer()))
     expired_at = Column(DateTime)
     description = Column(String)

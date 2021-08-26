@@ -1,6 +1,6 @@
+import datetime
 import hashlib
 import random
-import datetime
 
 
 def generate_secret_token():

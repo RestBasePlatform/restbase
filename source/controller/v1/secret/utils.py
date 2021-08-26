@@ -4,5 +4,3 @@ def encrypt_string(source: str) -> str:
 
 def decrypt_string(encrypted_string: str) -> str:
     return encrypted_string
-
-

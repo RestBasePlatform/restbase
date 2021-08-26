@@ -1,13 +1,12 @@
-from .utils import encrypt_string
-from .utils import decrypt_string
-from .secret_worker import SecretWorker
-
 from models import Secrets
+
+from .secret_worker import SecretWorker
+from .utils import decrypt_string
+from .utils import encrypt_string
 
 
 class SQLiteSecretWorker(SecretWorker):
-
-    def add_secret(self, not_encrypted_secret_string: str, db_session):
+    def add_secret(self, not_encrypted_secret_string: str, db_session) -> int:
         encrypted_data = encrypt_string(not_encrypted_secret_string)
         secret = Secrets(secret=encrypted_data)
         db_session.add(secret)

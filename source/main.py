@@ -1,9 +1,10 @@
-import uvicorn
 import os
-from fastapi import FastAPI
-from routes.v1 import v1_router
+
+import uvicorn
 from controller.v1.utils import generate_secret_token
+from fastapi import FastAPI
 from loguru import logger
+from routes.v1 import v1_router
 
 
 app = FastAPI()
