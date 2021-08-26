@@ -25,3 +25,4 @@ class Groups(Base):
     id = Column(Integer, primary_key=True)
     description = Column(String)
     access_config = Column(JSON)
+    users = Column(ARRAY(Integer()))
